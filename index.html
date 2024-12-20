@@ -130,14 +130,13 @@
 
     <!-- Firebase Configuration -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } 
+        from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            // Replace with your actual config values
+            // Replace these with your actual config values
             apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
     authDomain: "my-home-events.firebaseapp.com",
     projectId: "my-home-events",
@@ -149,12 +148,15 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
-        window.auth = auth; // Make auth available to the rest of your code
+
+        // Make auth functions available globally
+        window.auth = auth;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.updateProfile = updateProfile;
     </script>
 
-    <!-- Your main JavaScript -->
     <script>
         function toggleForms() {
             const loginForm = document.getElementById('login-form');
@@ -183,8 +185,8 @@
             }
 
             try {
-                const userCredential = await window.auth.createUserWithEmailAndPassword(email, password);
-                await userCredential.user.updateProfile({
+                const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
+                await window.updateProfile(userCredential.user, {
                     displayName: name
                 });
                 window.location.href = '/dashboard.html';
@@ -200,7 +202,7 @@
             const password = document.getElementById('login-password').value;
 
             try {
-                await window.auth.signInWithEmailAndPassword(email, password);
+                await window.signInWithEmailAndPassword(window.auth, email, password);
                 window.location.href = '/dashboard.html';
             } catch (error) {
                 errorDiv.textContent = error.message;
