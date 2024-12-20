@@ -203,7 +203,7 @@
 
             try {
                 await window.signInWithEmailAndPassword(window.auth, email, password);
-                window.location.href = '/my-home-events/dashboard.html';
+                window.location.href = 'https://my-home-log.github.io/my-home-events/dashboard.html';
             } catch (error) {
                 errorDiv.textContent = error.message;
             }
@@ -212,7 +212,8 @@
         // Check if user is already logged in
         window.auth.onAuthStateChanged(function(user) {
             if (user) {
-                window.location.href = '/my-home-events/index.html';
+                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+                
             }
         });
     </script>
