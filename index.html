@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Home Events</title>
     <style>
+        /* Your existing styles remain the same */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -68,6 +69,11 @@
         #signup-form {
             display: none;
         }
+        .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -77,7 +83,7 @@
         <!-- Login Form -->
         <div id="login-form" class="form-container">
             <h2>Login</h2>
-            <form>
+            <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="login-email">Email</label>
                     <input type="email" id="login-email" required>
@@ -87,6 +93,7 @@
                     <input type="password" id="login-password" required>
                 </div>
                 <button type="submit" class="button">Login</button>
+                <div id="login-error" class="error-message"></div>
             </form>
             <div class="toggle-form">
                 <p>Don't have an account? <a onclick="toggleForms()">Sign up</a></p>
@@ -96,7 +103,7 @@
         <!-- Signup Form -->
         <div id="signup-form" class="form-container">
             <h2>Sign Up</h2>
-            <form>
+            <form id="signupForm" onsubmit="handleSignup(event)">
                 <div class="form-group">
                     <label for="signup-name">Full Name</label>
                     <input type="text" id="signup-name" required>
@@ -107,13 +114,14 @@
                 </div>
                 <div class="form-group">
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" required>
+                    <input type="password" id="signup-password" required minlength="6">
                 </div>
                 <div class="form-group">
                     <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" required>
+                    <input type="password" id="signup-confirm-password" required minlength="6">
                 </div>
                 <button type="submit" class="button">Sign Up</button>
+                <div id="signup-error" class="error-message"></div>
             </form>
             <div class="toggle-form">
                 <p>Already have an account? <a onclick="toggleForms()">Login</a></p>
@@ -121,7 +129,31 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <!-- Copy the SDK scripts from Firebase here -->
+    
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
     <script>
+        // Copy your Firebase configuration from the Firebase Console here
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+    authDomain: "my-home-events.firebaseapp.com",
+    projectId: "my-home-events",
+    storageBucket: "my-home-events.firebasestorage.app",
+    messagingSenderId: "132719765347",
+    appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+    measurementId: "G-4TXVSJ70QW"
+        };
+
+        // Initialize Firebase
+       const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
         function toggleForms() {
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
@@ -134,6 +166,51 @@
                 signupForm.style.display = 'block';
             }
         }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const errorDiv = document.getElementById('signup-error');
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const name = document.getElementById('signup-name').value;
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
+            }
+
+            try {
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({
+                    displayName: name
+                });
+                window.location.href = '/dashboard.html'; // We'll create this page next
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const errorDiv = document.getElementById('login-error');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                await firebase.auth().signInWithEmailAndPassword(email, password);
+                window.location.href = '/dashboard.html'; // We'll create this page next
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+
+        // Check if user is already logged in
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                window.location.href = '/dashboard.html';
+            }
+        });
     </script>
 </body>
 </html>
