@@ -249,15 +249,18 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            query, 
-            where, 
-            orderBy, 
-            limit,
-            getDocs 
-        } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+           import { 
+    getFirestore, 
+    collection, 
+    addDoc,
+    deleteDoc,  // Add this
+    doc,        // Add this
+    query, 
+    where, 
+    orderBy, 
+    limit,
+    getDocs 
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -278,15 +281,18 @@
         // Make Firebase services available globally
         window.auth = auth;
         window.db = db;
-        window.firestore = {
-            collection,
-            addDoc,
-            query,
-            where,
-            orderBy,
-            limit,
-            getDocs
-        };
+        // Make Firebase services available globally
+window.firestore = {
+    collection,
+    addDoc,
+    deleteDoc,  // Add this
+    doc,        // Add this
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs
+};
 
         // Load recent services when user is authenticated
         auth.onAuthStateChanged(async (user) => {
