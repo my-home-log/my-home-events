@@ -338,43 +338,49 @@
         }
 
         // Load recent services
-        async function loadRecentServices(userId) {
-            const recentServicesDiv = document.getElementById('recentServices');
-            try {
-                const q = window.firestore.query(
-                    window.firestore.collection(window.db, 'serviceRecords'),
-                    window.firestore.where('user_id', '==', userId),
-                    window.firestore.orderBy('date_of_service', 'desc'),
-                    window.firestore.limit(5)
-                );
+       // Load recent services
+async function loadRecentServices(userId) {
+    const recentServicesDiv = document.getElementById('recentServices');
+    try {
+        console.log('Loading services for user:', userId);
+        
+        const serviceRecordsRef = window.firestore.collection(window.db, 'serviceRecords');
+        const q = window.firestore.query(
+            serviceRecordsRef,
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc'),
+            window.firestore.limit(5)
+        );
 
-                const querySnapshot = await window.firestore.getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    recentServicesDiv.innerHTML = '<p>No service records found.</p>';
-                    return;
-                }
+        console.log('Query created, fetching documents...');
+        const querySnapshot = await window.firestore.getDocs(q);
+        console.log('Documents fetched:', querySnapshot.size);
 
-                let html = '';
-                querySnapshot.forEach((doc) => {
-                    const record = doc.data();
-                    html += `
-                        <div class="service-record">
-                            <h4>${record.service_performed}</h4>
-                            <p class="date">${formatDate(record.date_of_service)}</p>
-                            <p><strong>Category:</strong> ${record.category}</p>
-                            <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-                            <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
-                        </div>
-                    `;
-                });
-
-                recentServicesDiv.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading recent services:', error);
-                recentServicesDiv.innerHTML = '<p>Error loading recent services.</p>';
-            }
+        if (querySnapshot.empty) {
+            recentServicesDiv.innerHTML = '<p>No service records found. Add your first service record!</p>';
+            return;
         }
+
+        let html = '';
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            html += `
+                <div class="service-record">
+                    <h4>${record.service_performed}</h4>
+                    <p class="date">${formatDate(record.date_of_service)}</p>
+                    <p><strong>Category:</strong> ${record.category}</p>
+                    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+                    <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
+                </div>
+            `;
+        });
+
+        recentServicesDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Detailed error loading services:', error);
+        recentServicesDiv.innerHTML = '<p>Error loading recent services. Please try refreshing the page.</p>';
+    }
+}
 
         // Submit service record
         async function submitServiceRecord(event) {
