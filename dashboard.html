@@ -246,15 +246,14 @@
 
     <!-- Firebase Integration -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { 
-           import { 
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { 
     getFirestore, 
     collection, 
     addDoc,
-    deleteDoc,  // Add this
-    doc,        // Add this
+    deleteDoc,
+    doc, 
     query, 
     where, 
     orderBy, 
@@ -285,8 +284,8 @@
 window.firestore = {
     collection,
     addDoc,
-    deleteDoc,  // Add this
-    doc,        // Add this
+    deleteDoc,
+    doc,
     query,
     where,
     orderBy,
