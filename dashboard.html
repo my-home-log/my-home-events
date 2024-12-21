@@ -300,6 +300,7 @@
             };
 
             try {
+                console.log('Record to be saved:', record);
                 await addDoc(collection(db, 'serviceRecords'), record);
                 alert('Service record saved successfully!');
                 closeModal();
