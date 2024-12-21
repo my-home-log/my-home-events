@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - My Home Events</title>
+    <title>My Home Events</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,46 +12,64 @@
             background-color: #f0f2f5;
         }
         .container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         h1 {
-            text-align: center;
             color: #1a73e8;
+            text-align: center;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
         }
         .form-group {
             margin-bottom: 15px;
         }
         .form-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
         .form-group input {
             width: 100%;
             padding: 8px;
-            margin-top: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
         }
         .button {
-            width: 100%;
-            padding: 10px;
-            border: none;
             background-color: #1a73e8;
             color: white;
-            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
+            font-size: 16px;
         }
         .button:hover {
             background-color: #1557b0;
         }
+        .toggle-form {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .toggle-form a {
+            color: #1a73e8;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #signup-form {
+            display: none;
+        }
         .error-message {
-            color: red;
+            color: #d32f2f;
             margin-top: 10px;
             text-align: center;
         }
@@ -60,48 +78,142 @@
 <body>
     <div class="container">
         <h1>My Home Events</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
+        
+        <!-- Login Form -->
+        <div id="login-form" class="form-container">
+            <h2>Login</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="button">Login</button>
+                <div id="login-error" class="error-message"></div>
+            </form>
+            <div class="toggle-form">
+                <p>Don't have an account? <a onclick="toggleForms()">Sign up</a></p>
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" required>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signup-form" class="form-container">
+            <h2>Sign Up</h2>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" id="signup-confirm-password" required minlength="6">
+                </div>
+                <button type="submit" class="button">Sign Up</button>
+                <div id="signup-error" class="error-message"></div>
+            </form>
+            <div class="toggle-form">
+                <p>Already have an account? <a onclick="toggleForms()">Login</a></p>
             </div>
-            <button type="submit" class="button">Log In</button>
-            <p class="error-message" id="error"></p>
-        </form>
+        </div>
     </div>
 
+    <!-- Firebase Configuration -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } 
+        from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "your-api-key",
-        authDomain: "my-home-events.firebaseapp.com",
-        projectId: "my-home-events",
-        storageBucket: "my-home-events.appspot.com",
-        messagingSenderId: "your-messaging-sender-id",
-        appId: "your-app-id",
-    };
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    // Use a flag to prevent infinite loops
-    let authChecked = false;
+        // Make auth functions available globally
+        window.auth = auth;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.updateProfile = updateProfile;
+    </script>
 
-    // Check user authentication state
-    onAuthStateChanged(auth, (user) => {
-        if (authChecked) return; // Prevent multiple calls
-
-        if (user) {
-            // Redirect to dashboard if logged in
-            window.location.href = "dashboard.html";
-        } else {
-            authChecked = true; // Set flag after checking
+    <script>
+        function toggleForms() {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            }
         }
-    });
-</script>
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const errorDiv = document.getElementById('signup-error');
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const name = document.getElementById('signup-name').value;
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
+            }
+
+            try {
+                const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
+                await window.updateProfile(userCredential.user, {
+                    displayName: name
+                });
+                window.location.href = 'https://my-home-log.github.io/my-home-events/dashboard.html';
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const errorDiv = document.getElementById('login-error');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                await window.signInWithEmailAndPassword(window.auth, email, password);
+                window.location.href = 'https://my-home-log.github.io/my-home-events/dashboard.html';
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+
+        // Check if user is already logged in
+        window.auth.onAuthStateChanged(function(user) {
+            if (user) {
+                window.location.href = 'https://my-home-log.github.io/my-home-events/dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
