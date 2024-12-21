@@ -281,7 +281,9 @@
         };
 
         // Submit service record form to Firestore
+
         async function submitServiceRecord(event) {
+            console.log('submitServiceRecord function triggered');
             event.preventDefault();
 
             const record = {
