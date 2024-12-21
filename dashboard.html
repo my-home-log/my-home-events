@@ -240,6 +240,7 @@
         const auth = getAuth(app);
         window.auth = auth;
         const db = getFirestore(app);
+        console.log('Firestore initialized:', db);
 
         // Check if a user is logged in and update the welcome message
         auth.onAuthStateChanged((user) => {
