@@ -127,6 +127,27 @@
             color: #666;
             font-size: 12px;
         }
+        
+        /* Service Record Styles */
+        .service-record {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+        }
+        .service-record h4 {
+            margin: 0 0 10px 0;
+            color: #1a73e8;
+        }
+        .service-record p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .service-record .date {
+            color: #666;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -148,7 +169,7 @@
             <div class="dashboard-card">
                 <h3>Recent Services</h3>
                 <div id="recentServices">
-                    <p>Your recent service records will appear here.</p>
+                    <p>Loading recent services...</p>
                 </div>
             </div>
             <div class="dashboard-card">
@@ -164,7 +185,7 @@
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal()">&times;</span>
                 <h2>Add New Service Record</h2>
-                <form id="serviceForm">
+                <form id="serviceForm" onsubmit="submitServiceRecord(event)">
                     <div class="form-group">
                         <label for="serviceDate">Date of Service*</label>
                         <input type="date" id="serviceDate" required>
@@ -227,6 +248,16 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            query, 
+            where, 
+            orderBy, 
+            limit,
+            getDocs 
+        } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -242,11 +273,26 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Check User Authentication State
-        auth.onAuthStateChanged((user) => {
+        // Make Firebase services available globally
+        window.auth = auth;
+        window.db = db;
+        window.firestore = {
+            collection,
+            addDoc,
+            query,
+            where,
+            orderBy,
+            limit,
+            getDocs
+        };
+
+        // Load recent services when user is authenticated
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 document.getElementById('userName').textContent = user.displayName || user.email;
+                await loadRecentServices(user.uid);
             } else {
                 window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
             }
@@ -263,11 +309,13 @@
         });
     </script>
 
-    <!-- Modal Functions -->
+    <!-- Application Functions -->
     <script>
         // Modal control functions
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
+            // Set today's date as default
+            document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
         }
 
         function closeModal() {
@@ -283,12 +331,90 @@
             }
         };
 
-        // Form submission handler (placeholder for now)
-        document.getElementById('serviceForm').addEventListener('submit', function(event) {
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Load recent services
+        async function loadRecentServices(userId) {
+            const recentServicesDiv = document.getElementById('recentServices');
+            try {
+                const q = window.firestore.query(
+                    window.firestore.collection(window.db, 'serviceRecords'),
+                    window.firestore.where('user_id', '==', userId),
+                    window.firestore.orderBy('date_of_service', 'desc'),
+                    window.firestore.limit(5)
+                );
+
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    recentServicesDiv.innerHTML = '<p>No service records found.</p>';
+                    return;
+                }
+
+                let html = '';
+                querySnapshot.forEach((doc) => {
+                    const record = doc.data();
+                    html += `
+                        <div class="service-record">
+                            <h4>${record.service_performed}</h4>
+                            <p class="date">${formatDate(record.date_of_service)}</p>
+                            <p><strong>Category:</strong> ${record.category}</p>
+                            <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+                            <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
+                        </div>
+                    `;
+                });
+
+                recentServicesDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading recent services:', error);
+                recentServicesDiv.innerHTML = '<p>Error loading recent services.</p>';
+            }
+        }
+
+        // Submit service record
+        async function submitServiceRecord(event) {
             event.preventDefault();
-            console.log('Form submitted - will add save functionality next');
-            closeModal();
-        });
+            const currentUser = window.auth.currentUser;
+            
+            if (!currentUser) {
+                alert('Please log in to save records');
+                return;
+            }
+
+            try {
+                const record = {
+                    date_of_service: document.getElementById('serviceDate').value,
+                    category: document.getElementById('serviceCategory').value,
+                    service_performed: document.getElementById('servicePerformed').value,
+                    notes: document.getElementById('serviceNotes').value,
+                    vendor_name: document.getElementById('vendorName').value,
+                    vendor_phone: document.getElementById('vendorPhone').value,
+                    cost: parseFloat(document.getElementById('cost').value) || 0,
+                    follow_up_date: document.getElementById('followUpDate').value,
+                    user_id: currentUser.uid,
+                    created_at: new Date().toISOString()
+                };
+
+                await window.firestore.addDoc(
+                    window.firestore.collection(window.db, 'serviceRecords'),
+                    record
+                );
+
+                // Refresh the recent services list
+                await loadRecentServices(currentUser.uid);
+                
+                alert('Service record saved successfully!');
+                closeModal();
+            } catch (error) {
+                console.error('Error saving record:', error);
+                alert('Error saving record: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
