@@ -161,7 +161,7 @@
                 <span class="close-button" onclick="closeModal()">&times;</span>
                 <h2>Add New Service Record</h2>
                 <!-- Form for adding a service record -->
-                <form id="serviceForm">
+                <form id="serviceForm" onsubmit="submitServiceRecord(event)">
                     <div class="form-group">
                         <label for="serviceDate">Date of Service*</label>
                         <input type="date" id="serviceDate" required>
@@ -235,7 +235,6 @@ import { getFirestore, collection, addDoc } from "https://www.gstatic.com/fireba
     appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
     measurementId: "G-4TXVSJ70QW"
 };
-    };
 
     // 3. Initialize Firebase services
     const app = initializeApp(firebaseConfig);
