@@ -370,7 +370,7 @@ async function loadRecentServices(userId) {
             serviceRecordsRef,
             window.firestore.where('user_id', '==', userId),
             window.firestore.orderBy('date_of_service', 'desc'),
-            window.firestore.limit(5)
+            window.firestore.limit(3)
         );
 
         console.log('Query created, fetching documents...');
