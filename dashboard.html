@@ -66,8 +66,6 @@
         .add-service-btn:hover {
             background-color: #1557b0;
         }
-
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -105,24 +103,15 @@
             margin-bottom: 8px;
             font-weight: bold;
         }
-       .form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    font-family: Arial, sans-serif;
-    color: #666;
-    font-size: 14px;
-}
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
         }
         .form-group textarea {
             height: 100px;
@@ -171,7 +160,8 @@
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal()">&times;</span>
                 <h2>Add New Service Record</h2>
-                <form id="serviceForm" onsubmit="submitServiceRecord(event)">
+                <!-- Form for adding a service record -->
+                <form id="serviceForm">
                     <div class="form-group">
                         <label for="serviceDate">Date of Service*</label>
                         <input type="date" id="serviceDate" required>
@@ -193,14 +183,12 @@
 
                     <div class="form-group">
                         <label for="servicePerformed">Service Performed*</label>
-                        <input type="text" id="servicePerformed" required 
-                               placeholder="e.g., Septic Pumping, Dishwasher Repair">
+                        <input type="text" id="servicePerformed" required placeholder="e.g., Septic Pumping, Dishwasher Repair">
                     </div>
 
                     <div class="form-group">
                         <label for="serviceNotes">Service Notes</label>
-                        <textarea id="serviceNotes" 
-                                 placeholder="Describe the service, issues found, recommendations, etc."></textarea>
+                        <textarea id="serviceNotes" placeholder="Describe the service, issues found, recommendations, etc."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -224,13 +212,6 @@
                         <small>For future service reminders</small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="attachments">Attachments</label>
-                        <input type="file" id="attachments" multiple
-                               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                        <small>Upload receipts, warranties, or photos (Max 5MB each)</small>
-                    </div>
-
                     <button type="submit" class="add-service-btn">Save Record</button>
                 </form>
             </div>
@@ -241,40 +222,47 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration setup
         const firebaseConfig = {
-            // Replace with your actual Firebase config
             apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
-    authDomain: "my-home-events.firebaseapp.com",
-    projectId: "my-home-events",
-    storageBucket: "my-home-events.firebasestorage.app",
-    messagingSenderId: "132719765347",
-    appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
-    measurementId: "G-4TXVSJ70QW"
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firebasestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
         };
 
-        // Initialize Firebase
+        // Initialize Firebase app, authentication, and Firestore
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Check if user is logged in
-        auth.onAuthStateChanged(function(user) {
+        // Check if a user is logged in and update the welcome message
+        auth.onAuthStateChanged((user) => {
             if (user) {
-                // Update welcome message
                 document.getElementById('userName').textContent = user.displayName || user.email;
             } else {
-                // Redirect to login if not authenticated
+                // Redirect to login if user is not logged in
                 window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
             }
         });
 
-        // Make auth available to window for logout function
-        window.auth = auth;
+        // Logout functionality
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
     </script>
 
     <script>
-        // Modal Functions
+        // Open and close modal functionality
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
         }
@@ -284,31 +272,42 @@
             document.getElementById('serviceForm').reset();
         }
 
-        // Close modal if clicking outside
+        // Close modal when clicking outside the modal
         window.onclick = function(event) {
             const modal = document.getElementById('serviceModal');
             if (event.target === modal) {
                 closeModal();
             }
-        }
+        };
 
-        // Logout Function
-        document.getElementById('logoutButton').addEventListener('click', async () => {
-            try {
-                await window.auth.signOut();
-                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
-            } catch (error) {
-                console.error('Error signing out:', error);
-            }
-        });
-
-        // Form Submission
+        // Submit service record form to Firestore
         async function submitServiceRecord(event) {
             event.preventDefault();
-            // We'll add the Firebase storage code here in the next step
-            console.log('Form submitted - Firebase integration coming next');
-            closeModal();
+
+            const record = {
+                date_of_service: document.getElementById('serviceDate').value,
+                category: document.getElementById('serviceCategory').value,
+                service_performed: document.getElementById('servicePerformed').value,
+                notes: document.getElementById('serviceNotes').value,
+                vendor_name: document.getElementById('vendorName').value,
+                vendor_phone: document.getElementById('vendorPhone').value,
+                cost: parseFloat(document.getElementById('cost').value),
+                follow_up_date: document.getElementById('followUpDate').value,
+                user_id: auth.currentUser.uid // Attach logged-in user's ID
+            };
+
+            try {
+                await addDoc(collection(db, 'serviceRecords'), record);
+                alert('Service record saved successfully!');
+                closeModal();
+            } catch (error) {
+                console.error('Error saving record:', error);
+                alert('Failed to save service record.');
+            }
         }
+
+        // Attach form submission handler
+        document.getElementById('serviceForm').addEventListener('submit', submitServiceRecord);
     </script>
 </body>
 </html>
