@@ -296,7 +296,7 @@ window.submitServiceRecord = async function(event) {
     console.log('1. Submit function started');
 
     try {
-        const currentUser = auth.currentUser;
+        const currentUser = window.auth.currentUser;
         console.log('2. Current user:', currentUser);
 
         if (!currentUser) {
@@ -317,14 +317,15 @@ window.submitServiceRecord = async function(event) {
         };
 
         console.log('3. Record data:', record);
-        console.log('4. Database reference:', db);
-        
-        const serviceRecordsRef = collection(db, 'serviceRecords');
-        console.log('5. Collection reference:', serviceRecordsRef);
 
-        const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'serviceRecords'), record);
-        console.log('6. Document written with ID:', docRef.id);
-        
+        // Reference the collection
+        const serviceRecordsRef = collection(window.db, 'serviceRecords');
+        console.log('4. Collection reference:', serviceRecordsRef);
+
+        // Add document to Firestore
+        const docRef = await addDoc(serviceRecordsRef, record);
+        console.log('5. Document written with ID:', docRef.id);
+
         alert('Service record saved successfully!');
         closeModal();
     } catch (error) {
