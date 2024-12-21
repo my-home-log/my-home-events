@@ -296,44 +296,37 @@ window.auth = auth;
 
 window.submitServiceRecord = async function(event) {
     event.preventDefault();
-    console.log('1. Submit function started');
 
     try {
         const currentUser = window.auth.currentUser;
-        console.log('2. Current user:', currentUser);
-
         if (!currentUser) {
-            throw new Error('No user logged in');
+            throw new Error("No user logged in");
         }
 
         const record = {
-            date_of_service: document.getElementById('serviceDate').value,
-            category: document.getElementById('serviceCategory').value,
-            service_performed: document.getElementById('servicePerformed').value,
-            notes: document.getElementById('serviceNotes').value,
-            vendor_name: document.getElementById('vendorName').value,
-            vendor_phone: document.getElementById('vendorPhone').value,
-            cost: parseFloat(document.getElementById('cost').value) || 0,
-            follow_up_date: document.getElementById('followUpDate').value,
+            date_of_service: document.getElementById("serviceDate").value,
+            category: document.getElementById("serviceCategory").value,
+            service_performed: document.getElementById("servicePerformed").value,
+            notes: document.getElementById("serviceNotes").value,
+            vendor_name: document.getElementById("vendorName").value,
+            vendor_phone: document.getElementById("vendorPhone").value,
+            cost: parseFloat(document.getElementById("cost").value) || 0,
+            follow_up_date: document.getElementById("followUpDate").value,
             user_id: currentUser.uid,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
         };
 
-        console.log('3. Record data:', record);
+        // Reference the Firestore collection
+        const serviceRecordsRef = collection(window.db, "serviceRecords");
 
-        // Reference the collection
-        const serviceRecordsRef = collection(window.db, 'serviceRecords');
-        console.log('4. Collection reference:', serviceRecordsRef);
-
-        // Add document to Firestore
+        // Add the record to Firestore
         const docRef = await addDoc(serviceRecordsRef, record);
-        console.log('5. Document written with ID:', docRef.id);
-
-        alert('Service record saved successfully!');
+        console.log("Document written with ID:", docRef.id);
+        alert("Service record saved successfully!");
         closeModal();
     } catch (error) {
-        console.error('Detailed error:', error);
-        alert('Failed to save service record: ' + error.message);
+        console.error("Error saving record:", error);
+        alert("Failed to save service record: " + error.message);
     }
 };
 
