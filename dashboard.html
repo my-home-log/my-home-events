@@ -284,33 +284,47 @@
 
         // Submit service record form to Firestore
 
-async function submitServiceRecord(event) {
-    console.log('submitServiceRecord function triggered');
+window.submitServiceRecord = async function(event) {
     event.preventDefault();
-
-    const record = {
-        date_of_service: document.getElementById('serviceDate').value,
-        category: document.getElementById('serviceCategory').value,
-        service_performed: document.getElementById('servicePerformed').value,
-        notes: document.getElementById('serviceNotes').value,
-        vendor_name: document.getElementById('vendorName').value,
-        vendor_phone: document.getElementById('vendorPhone').value,
-        cost: parseFloat(document.getElementById('cost').value) || 0,
-        follow_up_date: document.getElementById('followUpDate').value,
-        user_id: window.auth.currentUser.uid,
-        timestamp: new Date().toISOString()
-    };
+    console.log('1. Submit function started');
 
     try {
-        console.log('Record to be saved:', record);
-        await window.addDoc(window.collection(window.db, 'serviceRecords'), record);
+        const currentUser = auth.currentUser;
+        console.log('2. Current user:', currentUser);
+
+        if (!currentUser) {
+            throw new Error('No user logged in');
+        }
+
+        const record = {
+            date_of_service: document.getElementById('serviceDate').value,
+            category: document.getElementById('serviceCategory').value,
+            service_performed: document.getElementById('servicePerformed').value,
+            notes: document.getElementById('serviceNotes').value,
+            vendor_name: document.getElementById('vendorName').value,
+            vendor_phone: document.getElementById('vendorPhone').value,
+            cost: parseFloat(document.getElementById('cost').value) || 0,
+            follow_up_date: document.getElementById('followUpDate').value,
+            user_id: currentUser.uid,
+            created_at: new Date().toISOString()
+        };
+
+        console.log('3. Record data:', record);
+        console.log('4. Database reference:', db);
+        
+        const serviceRecordsRef = collection(db, 'serviceRecords');
+        console.log('5. Collection reference:', serviceRecordsRef);
+
+        const docRef = await addDoc(serviceRecordsRef, record);
+        console.log('6. Document written with ID:', docRef.id);
+        
         alert('Service record saved successfully!');
         closeModal();
     } catch (error) {
-        console.error('Error saving record:', error);
+        console.error('Detailed error:', error);
         alert('Failed to save service record: ' + error.message);
     }
-}
+};
 
         // Attach form submission handler
         document.getElementById('serviceForm').addEventListener('submit', submitServiceRecord);
