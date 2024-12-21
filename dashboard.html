@@ -322,7 +322,23 @@
             document.getElementById('serviceModal').style.display = 'none';
             document.getElementById('serviceForm').reset();
         }
+// Delete record function
+    async function deleteRecord(docId) {
+        if (!confirm('Are you sure you want to delete this record?')) {
+            return;
+        }
 
+        try {
+            const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
+            await window.firestore.deleteDoc(docRef);
+            // Refresh the list after deletion
+            await loadRecentServices(window.auth.currentUser.uid);
+            alert('Record deleted successfully');
+        } catch (error) {
+            console.error('Error deleting record:', error);
+            alert('Error deleting record');
+        }
+    }
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('serviceModal');
