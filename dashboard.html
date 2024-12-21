@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Home Events - Dashboard</title>
     <style>
+        /* Keep your existing styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -84,11 +85,11 @@
         <div class="dashboard-content">
             <div class="dashboard-card">
                 <h3>Quick Actions</h3>
-                <button class="add-service-btn">Add New Service Record</button>
+                <button id="addServiceButton" class="add-service-btn">Add New Service Record</button>
             </div>
             <div class="dashboard-card">
                 <h3>Recent Services</h3>
-                <p>Your recent service records will appear here.</p>
+                <p id="recentServices">Your recent service records will appear here.</p>
             </div>
             <div class="dashboard-card">
                 <h3>Upcoming Maintenance</h3>
@@ -101,6 +102,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -115,6 +117,7 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         const auth = getAuth(app);
 
         // Check User Authentication State
@@ -125,7 +128,6 @@
             } else {
                 // Redirect to login if not authenticated
                 window.location.href = "https://my-home-log.github.io/my-home-events/index.html";
-                
             }
         });
 
@@ -134,9 +136,25 @@
             try {
                 await signOut(auth);
                 window.location.href = "https://my-home-log.github.io/my-home-events/index.html";
-                
             } catch (error) {
                 console.error('Logout Error:', error);
+            }
+        });
+
+        // Add Service Record Example
+        document.getElementById("addServiceButton").addEventListener("click", async () => {
+            try {
+                const serviceRecordsRef = collection(db, "serviceRecords");
+                const record = {
+                    date: new Date().toISOString(),
+                    description: "Sample service record",
+                    user_id: auth.currentUser.uid
+                };
+                const docRef = await addDoc(serviceRecordsRef, record);
+                alert(`Service record added with ID: ${docRef.id}`);
+            } catch (error) {
+                console.error("Error adding service record:", error);
+                alert("Failed to add service record.");
             }
         });
     </script>
