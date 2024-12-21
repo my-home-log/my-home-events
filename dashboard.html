@@ -47,40 +47,44 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } 
-        from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "my-home-events.firebaseapp.com",
-            projectId: "my-home-events",
-            storageBucket: "my-home-events.appspot.com",
-            messagingSenderId: "your-messaging-sender-id",
-            appId: "your-app-id",
-        };
+    const firebaseConfig = {
+        apiKey: "your-api-key",
+        authDomain: "my-home-events.firebaseapp.com",
+        projectId: "my-home-events",
+        storageBucket: "my-home-events.appspot.com",
+        messagingSenderId: "your-messaging-sender-id",
+        appId: "your-app-id",
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        // Check if user is logged in
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById("welcomeMessage").textContent = 
-                    `Welcome, ${user.displayName || user.email}!`;
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+    // Use a flag to prevent infinite loops
+    let authChecked = false;
 
-        document.getElementById("logoutButton").addEventListener("click", async () => {
-            try {
-                await signOut(auth);
-                window.location.href = "index.html";
-            } catch (error) {
-                console.error("Logout Error:", error);
-            }
-        });
-    </script>
-</body>
-</html>
+    // Check user authentication state
+    onAuthStateChanged(auth, (user) => {
+        if (authChecked) return; // Prevent multiple calls
+
+        if (!user) {
+            // Redirect to login if not authenticated
+            window.location.href = "index.html";
+        } else {
+            authChecked = true; // Set flag after checking
+            document.getElementById("userName").textContent = user.displayName || user.email;
+        }
+    });
+
+    // Logout logic
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "index.html";
+        } catch (error) {
+            console.error("Logout Error:", error);
+        }
+    });
+</script>
