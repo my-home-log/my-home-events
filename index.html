@@ -134,88 +134,71 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } 
         from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
-            // Replace these with your actual config values
             apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
-    authDomain: "my-home-events.firebaseapp.com",
-    projectId: "my-home-events",
-    storageBucket: "my-home-events.firebasestorage.app",
-    messagingSenderId: "132719765347",
-    appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
-    measurementId: "G-4TXVSJ70QW"
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Make auth functions available globally
-        window.auth = auth;
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.updateProfile = updateProfile;
-    </script>
-
-    <script>
-        function toggleForms() {
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            
-            if (loginForm.style.display === 'none') {
-                loginForm.style.display = 'block';
-                signupForm.style.display = 'none';
-            } else {
-                loginForm.style.display = 'none';
-                signupForm.style.display = 'block';
-            }
-        }
-
         async function handleSignup(event) {
             event.preventDefault();
-            const errorDiv = document.getElementById('signup-error');
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('signup-confirm-password').value;
             const name = document.getElementById('signup-name').value;
 
             if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
+                document.getElementById('signup-error').textContent = 'Passwords do not match';
                 return;
             }
 
             try {
-                const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
-                await window.updateProfile(userCredential.user, {
-                    displayName: name
-                });
-                window.location.href = '/dashboard.html';
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: name });
+                window.location.href = 'dashboard.html';
             } catch (error) {
-                errorDiv.textContent = error.message;
+                console.error(error);
+                document.getElementById('signup-error').textContent = error.message;
             }
         }
 
         async function handleLogin(event) {
             event.preventDefault();
-            const errorDiv = document.getElementById('login-error');
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
             try {
-                await window.signInWithEmailAndPassword(window.auth, email, password);
-                window.location.href = 'https://my-home-log.github.io/my-home-events/dashboard.html';
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'dashboard.html';
             } catch (error) {
-                errorDiv.textContent = error.message;
+                console.error(error);
+                document.getElementById('login-error').textContent = error.message;
             }
         }
 
-        // Check if user is already logged in
-        window.auth.onAuthStateChanged(function(user) {
+        // Redirect logged-in users to dashboard
+        auth.onAuthStateChanged((user) => {
             if (user) {
-                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
-                
+                window.location.href = 'dashboard.html';
             }
         });
+
+        function toggleForms() {
+            document.getElementById('login-form').style.display =
+                document.getElementById('login-form').style.display === 'none' ? 'block' : 'none';
+            document.getElementById('signup-form').style.display =
+                document.getElementById('signup-form').style.display === 'none' ? 'block' : 'none';
+        }
     </script>
 </body>
 </html>
+
