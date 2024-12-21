@@ -220,48 +220,54 @@
 
     <!-- Firebase Configuration -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    // 1. All imports at the top
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Firebase configuration setup
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
-            authDomain: "my-home-events.firebaseapp.com",
-            projectId: "my-home-events",
-            storageBucket: "my-home-events.firebasestorage.app",
-            messagingSenderId: "132719765347",
-            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
-            measurementId: "G-4TXVSJ70QW"
-        };
+    // 2. Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+        authDomain: "my-home-events.firebaseapp.com",
+        projectId: "my-home-events",
+        storageBucket: "my-home-events.firebasestorage.app",
+        messagingSenderId: "132719765347",
+        appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+        measurementId: "G-4TXVSJ70QW"
+    };
 
-        // Initialize Firebase app, authentication, and Firestore
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        window.auth = auth;
-        const db = getFirestore(app);
-        console.log('Firestore initialized:', db);
+    // 3. Initialize Firebase services
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Check if a user is logged in and update the welcome message
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('userName').textContent = user.displayName || user.email;
-            } else {
-                // Redirect to login if user is not logged in
-                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
-            }
-        });
+    // 4. Make necessary functions available globally
+    window.db = db;
+    window.auth = auth;
+    window.firestore = {
+        collection: collection,
+        addDoc: addDoc
+    };
 
-        // Logout functionality
-        document.getElementById('logoutButton').addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
-            } catch (error) {
-                console.error('Error signing out:', error);
-            }
-        });
-    </script>
+    // 5. Rest of your existing code (auth state observer, etc.)
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('userName').textContent = user.displayName || user.email;
+        } else {
+            window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+        }
+    });
+
+    // Logout handler stays the same
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    });
+</script>
 
     <script>
         // Open and close modal functionality
@@ -315,7 +321,7 @@ window.submitServiceRecord = async function(event) {
         const serviceRecordsRef = collection(db, 'serviceRecords');
         console.log('5. Collection reference:', serviceRecordsRef);
 
-        const docRef = await addDoc(serviceRecordsRef, record);
+        const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'serviceRecords'), record);
         console.log('6. Document written with ID:', docRef.id);
         
         alert('Service record saved successfully!');
