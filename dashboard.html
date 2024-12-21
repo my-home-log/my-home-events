@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - My Home Events</title>
+    <title>My Home Events - Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,79 +12,131 @@
             background-color: #f0f2f5;
         }
         .container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
         }
         h1 {
-            text-align: center;
             color: #1a73e8;
+            margin: 0;
         }
         .logout-btn {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
             background-color: #dc3545;
             color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .dashboard-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .add-service-btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
         }
-        .logout-btn:hover {
-            background-color: #c82333;
+        .add-service-btn:hover {
+            background-color: #1557b0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to My Home Events</h1>
-        <p id="welcomeMessage">Loading...</p>
-        <button id="logoutButton" class="logout-btn">Log Out</button>
+        <div class="header">
+            <h1>My Home Events</h1>
+            <button id="logoutButton" class="logout-btn">Logout</button>
+        </div>
+        
+        <div class="welcome-message">
+            <h2>Welcome, <span id="userName">User</span>!</h2>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-card">
+                <h3>Quick Actions</h3>
+                <button class="add-service-btn">Add New Service Record</button>
+            </div>
+            <div class="dashboard-card">
+                <h3>Recent Services</h3>
+                <div id="recentServices">
+                    <p>Your recent service records will appear here.</p>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Upcoming Maintenance</h3>
+                <div id="upcomingMaintenance">
+                    <p>Your scheduled maintenance tasks will appear here.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Firebase Integration -->
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "your-api-key",
-        authDomain: "my-home-events.firebaseapp.com",
-        projectId: "my-home-events",
-        storageBucket: "my-home-events.appspot.com",
-        messagingSenderId: "your-messaging-sender-id",
-        appId: "your-app-id",
-    };
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    // Use a flag to prevent infinite loops
-    let authChecked = false;
+        // Check User Authentication State
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('userName').textContent = user.displayName || user.email;
+            } else {
+                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+            }
+        });
 
-    // Check user authentication state
-    onAuthStateChanged(auth, (user) => {
-        if (authChecked) return; // Prevent multiple calls
-
-        if (!user) {
-            // Redirect to login if not authenticated
-            window.location.href = "index.html";
-        } else {
-            authChecked = true; // Set flag after checking
-            document.getElementById("userName").textContent = user.displayName || user.email;
-        }
-    });
-
-    // Logout logic
-    document.getElementById("logoutButton").addEventListener("click", async () => {
-        try {
-            await signOut(auth);
-            window.location.href = "index.html";
-        } catch (error) {
-            console.error("Logout Error:", error);
-        }
-    });
-</script>
+        // Logout Functionality
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
+    </script>
+</body>
+</html>
