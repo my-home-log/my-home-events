@@ -180,7 +180,7 @@
             </div>
         </div>
         
-<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; max-width: 100%; padding: 20px;">
+<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">Year Summary</h3>
         <select id="yearFilter" onchange="filterByYear(this.value)" 
@@ -198,6 +198,26 @@
                 <strong>Total Cost:</strong> <span id="totalCost">$0.00</span>
             </div>
         </div>
+    </div>
+    <div class="table-container" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background-color: #f8f9fa;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vendor</th>
+                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600;">Cost</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Follow-up</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="yearSummaryTable">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">Select a year to view services</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
         
@@ -523,6 +543,7 @@ window.firestore = {
 function updateYearStats(selectedYear, docs) {
     const serviceCount = document.getElementById('serviceCount');
     const totalCost = document.getElementById('totalCost');
+    const tableBody = document.getElementById('yearSummaryTable');
     
     let filteredDocs = docs;
     if (selectedYear !== 'all') {
@@ -539,11 +560,42 @@ function updateYearStats(selectedYear, docs) {
 
     serviceCount.textContent = filteredDocs.length;
     totalCost.textContent = `$${total.toFixed(2)}`;
-}
 
-function filterByYear(year) {
-    const userId = window.auth.currentUser.uid;
-    loadAllServices(userId, year === 'all' ? 'date_desc' : year);
+    // Update table
+    if (filteredDocs.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found for this period</td></tr>';
+        return;
+    }
+
+    let html = '';
+    filteredDocs.forEach((doc) => {
+        const record = doc.data();
+        html += `
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px;">${formatDate(record.date_of_service)}</td>
+                <td style="padding: 12px;">${record.category}</td>
+                <td style="padding: 12px;">${record.service_performed}</td>
+                <td style="padding: 12px;">${record.vendor_name || 'Not specified'}</td>
+                <td style="padding: 12px; text-align: right;">$${record.cost?.toFixed(2) || '0.00'}</td>
+                <td style="padding: 12px;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+                <td style="padding: 12px; text-align: center;">
+                    <button onclick="deleteRecord('${doc.id}')" 
+                            style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+                        ❌
+                    </button>
+                </td>
+            </tr>
+            ${record.notes ? `
+            <tr style="border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">
+                <td colspan="7" style="padding: 8px 12px; font-size: 0.9em; color: #666;">
+                    <strong>Notes:</strong> ${record.notes}
+                </td>
+            </tr>
+            ` : ''}
+        `;
+    });
+
+    tableBody.innerHTML = html;
 }
         
         //load allservices list
