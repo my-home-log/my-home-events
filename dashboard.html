@@ -298,6 +298,7 @@ window.firestore = {
             if (user) {
                 document.getElementById('userName').textContent = user.displayName || user.email;
                 await loadRecentServices(user.uid);
+                await loadUpcomingMaintenance(user.uid); // Add this line
             } else {
                 window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
             }
