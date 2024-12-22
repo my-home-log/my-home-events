@@ -496,7 +496,7 @@ window.firestore = {
         querySnapshot.forEach((doc) => {
     const record = doc.data();
     html += `
-        <tr style="border-bottom: 1px solid #dee2e6;">
+        <tr style="border-bottom: 2px solid #dee2e6;">
             <td style="padding: 12px;">${formatDate(record.date_of_service)}</td>
             <td style="padding: 12px;">${record.category}</td>
             <td style="padding: 12px;">${record.service_performed}</td>
@@ -511,8 +511,8 @@ window.firestore = {
             </td>
         </tr>
         ${record.notes ? `
-        <tr style="border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">
-            <td colspan="7" style="padding: 8px 12px; font-size: 0.9em; color: #666;">
+        <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
+            <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
                 <strong>Notes:</strong> ${record.notes}
             </td>
         </tr>
