@@ -619,43 +619,45 @@ async function loadRecentServices(userId) {
 
         // Submit service record
         async function submitServiceRecord(event) {
-            event.preventDefault();
-            const currentUser = window.auth.currentUser;
-            
-            if (!currentUser) {
-                alert('Please log in to save records');
-                return;
-            }
+    event.preventDefault();
+    const currentUser = window.auth.currentUser;
+    
+    if (!currentUser) {
+        alert('Please log in to save records');
+        return;
+    }
 
-            try {
-                const record = {
-                    date_of_service: document.getElementById('serviceDate').value,
-                    category: document.getElementById('serviceCategory').value,
-                    service_performed: document.getElementById('servicePerformed').value,
-                    notes: document.getElementById('serviceNotes').value,
-                    vendor_name: document.getElementById('vendorName').value,
-                    vendor_phone: document.getElementById('vendorPhone').value,
-                    cost: parseFloat(document.getElementById('cost').value) || 0,
-                    follow_up_date: document.getElementById('followUpDate').value,
-                    user_id: currentUser.uid,
-                    created_at: new Date().toISOString()
-                };
+    try {
+        const record = {
+            date_of_service: document.getElementById('serviceDate').value,
+            category: document.getElementById('serviceCategory').value,
+            service_performed: document.getElementById('servicePerformed').value,
+            notes: document.getElementById('serviceNotes').value,
+            vendor_name: document.getElementById('vendorName').value,
+            vendor_phone: document.getElementById('vendorPhone').value,
+            cost: parseFloat(document.getElementById('cost').value) || 0,
+            follow_up_date: document.getElementById('followUpDate').value,
+            user_id: currentUser.uid,
+            created_at: new Date().toISOString()
+        };
 
-                await window.firestore.addDoc(
-                    window.firestore.collection(window.db, 'serviceRecords'),
-                    record
-                );
+        await window.firestore.addDoc(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            record
+        );
 
-                // Refresh the recent services list
-                await loadRecentServices(currentUser.uid);
-                
-                alert('Service record saved successfully!');
-                closeModal();
-            } catch (error) {
-                console.error('Error saving record:', error);
-                alert('Error saving record: ' + error.message);
-            }
-        }
+        // Refresh all sections
+        await loadRecentServices(currentUser.uid);
+        await loadUpcomingMaintenance(currentUser.uid);
+        await loadAllServices(currentUser.uid);
+        
+        alert('Service record saved successfully!');
+        closeModal();
+    } catch (error) {
+        console.error('Error saving record:', error);
+        alert('Error saving record: ' + error.message);
+    }
+}
     </script>
 </body>
 </html>
