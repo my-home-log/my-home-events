@@ -378,6 +378,9 @@ window.firestore = {
             await window.firestore.deleteDoc(docRef);
             // Refresh the list after deletion
             await loadRecentServices(window.auth.currentUser.uid);
+await loadUpcomingMaintenance(window.auth.currentUser.uid);
+await loadAllServices(window.auth.currentUser.uid);
+            
             alert('Record deleted successfully');
         } catch (error) {
             console.error('Error deleting record:', error);
