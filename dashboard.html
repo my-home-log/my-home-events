@@ -390,7 +390,7 @@ window.firestore = {
         <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
         <p><strong>Category:</strong> ${record.category}</p>
         <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-        <div class="calendar-buttons" style="margin-top: 10px;">
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
             <a href="${createCalendarLinks(
                 record.service_performed,
                 record.follow_up_date,
@@ -398,10 +398,8 @@ window.firestore = {
             ).googleUrl}" 
             target="_blank" 
             class="calendar-btn"
-            style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px;">
-                Add to: Google Calendar
-
-                
+            style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                🗓️ Google Calendar
             </a>
             <a href="${createCalendarLinks(
                 record.service_performed,
@@ -410,8 +408,8 @@ window.firestore = {
             ).iCalUrl}" 
             download="maintenance-reminder.ics"
             class="calendar-btn"
-            style="background-color: #80ef80; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
-                Add to: Other Calendars
+            style="background-color: #34C759; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                📅 Other Calendars
             </a>
         </div>
     </div>
