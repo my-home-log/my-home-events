@@ -180,7 +180,7 @@
             </div>
         </div>
         
-<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; width: 100%; padding: 20px;">
+<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; max-width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">Year Summary</h3>
         <select id="yearFilter" onchange="filterByYear(this.value)" 
@@ -656,7 +656,6 @@ END:VCALENDAR`;
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
-        // Load recent services
        // Load recent services
 async function loadRecentServices(userId) {
     const recentServicesDiv = document.getElementById('recentServices');
