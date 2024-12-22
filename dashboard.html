@@ -384,13 +384,23 @@ async function loadUpcomingMaintenance(userId) {
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             html += `
-                <div class="service-record">
-                    <h4>${record.service_performed}</h4>
-                    <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
-                    <p><strong>Category:</strong> ${record.category}</p>
-                    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-                </div>
-            `;
+    <div class="service-record">
+        <h4>${record.service_performed}</h4>
+        <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
+        <p><strong>Category:</strong> ${record.category}</p>
+        <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+        <a href="${createGoogleCalendarLink(
+            record.service_performed,
+            record.follow_up_date,
+            `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+        )}" 
+        target="_blank" 
+        class="calendar-btn"
+        style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block; margin-top: 10px;">
+            Add to Calendar
+        </a>
+    </div>
+`;
         });
 
         maintenanceDiv.innerHTML = html;
