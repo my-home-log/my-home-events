@@ -352,7 +352,7 @@ window.firestore = {
                 closeModal();
             }
         };
-// Loading Upcoming function
+// Loading Upcoming Maintenance function
         async function loadUpcomingMaintenance(userId) {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
@@ -390,16 +390,28 @@ window.firestore = {
         <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
         <p><strong>Category:</strong> ${record.category}</p>
         <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-        <a href="${createGoogleCalendarLink(
-            record.service_performed,
-            record.follow_up_date,
-            `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-        )}" 
-        target="_blank" 
-        class="calendar-btn"
-        style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block; margin-top: 10px;">
-            Add to Calendar
-        </a>
+        <div class="calendar-buttons" style="margin-top: 10px;">
+            <a href="${createCalendarLinks(
+                record.service_performed,
+                record.follow_up_date,
+                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            ).googleUrl}" 
+            target="_blank" 
+            class="calendar-btn"
+            style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px;">
+                Add to Google Calendar
+            </a>
+            <a href="${createCalendarLinks(
+                record.service_performed,
+                record.follow_up_date,
+                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            ).iCalUrl}" 
+            download="maintenance-reminder.ics"
+            class="calendar-btn"
+            style="background-color: #34C759; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                Download for Other Calendars
+            </a>
+        </div>
     </div>
 `;
         });
@@ -410,24 +422,38 @@ window.firestore = {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-       function createGoogleCalendarLink(title, date, description) {
+       //Calendar Links
+        function createCalendarLinks(title, date, description) {
     const eventDate = new Date(date);
-    // Create an end date 1 hour after start
     const endDate = new Date(eventDate);
     endDate.setHours(endDate.getHours() + 1);
-    
-    const params = {
+
+    // Google Calendar link
+    const googleParams = {
         action: 'TEMPLATE',
         text: title,
         dates: `${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}`,
         details: description
     };
-    
-    const url = `https://calendar.google.com/calendar/render?${Object.keys(params)
-        .map(key => `${key}=${encodeURIComponent(params[key])}`)
+    const googleUrl = `https://calendar.google.com/calendar/render?${Object.keys(googleParams)
+        .map(key => `${key}=${encodeURIComponent(googleParams[key])}`)
         .join('&')}`;
-    
-    return url;
+
+    // iCal format (works with Apple Calendar, Outlook, etc.)
+    const iCalParams = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART:${eventDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:${title}
+DESCRIPTION:${description}
+END:VEVENT
+END:VCALENDAR`;
+
+    const iCalBlob = new Blob([iCalParams], { type: 'text/calendar;charset=utf-8' });
+    const iCalUrl = URL.createObjectURL(iCalBlob);
+
+    return { googleUrl, iCalUrl };
 }
         
         // Format date for display
