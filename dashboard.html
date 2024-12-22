@@ -184,13 +184,16 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">All Services</h3>
         <select id="sortBy" onchange="sortServices(this.value)" 
-                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
-            <option value="date_desc">Date (Newest First)</option>
-            <option value="date_asc">Date (Oldest First)</option>
-            <option value="category">Category</option>
-            <option value="cost_desc">Cost (Highest First)</option>
-            <option value="cost_asc">Cost (Lowest First)</option>
-        </select>
+        style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
+    <option value="date_desc">All Services</option>
+    <option value="Plumbing">Plumbing</option>
+    <option value="HVAC">HVAC</option>
+    <option value="Electrical">Electrical</option>
+    <option value="Appliances">Appliances</option>
+    <option value="Structure">Structure/Building</option>
+    <option value="Landscaping">Landscaping</option>
+    <option value="GeneralMaintenance">General Maintenance</option>
+</select>
     </div>
     <div class="table-container" style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -460,31 +463,26 @@ window.firestore = {
     }
 }
        //all services list
-        async function loadAllServices(userId, sortBy = 'date_desc') {
+        async function loadAllServices(userId, filterBy = 'date_desc') {
     const tableBody = document.getElementById('allServicesTable');
     try {
-        let q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId)
-        );
-
-        // Add sorting based on selection
-        switch(sortBy) {
-            case 'date_desc':
-                q = window.firestore.query(q, window.firestore.orderBy('date_of_service', 'desc'));
-                break;
-            case 'date_asc':
-                q = window.firestore.query(q, window.firestore.orderBy('date_of_service', 'asc'));
-                break;
-            case 'category':
-                q = window.firestore.query(q, window.firestore.orderBy('category', 'asc'));
-                break;
-            case 'cost_desc':
-                q = window.firestore.query(q, window.firestore.orderBy('cost', 'desc'));
-                break;
-            case 'cost_asc':
-                q = window.firestore.query(q, window.firestore.orderBy('cost', 'asc'));
-                break;
+        let q;
+        
+        if (filterBy === 'date_desc') {
+            // Show all services sorted by date
+            q = window.firestore.query(
+                window.firestore.collection(window.db, 'serviceRecords'),
+                window.firestore.where('user_id', '==', userId),
+                window.firestore.orderBy('date_of_service', 'desc')
+            );
+        } else {
+            // Filter by category
+            q = window.firestore.query(
+                window.firestore.collection(window.db, 'serviceRecords'),
+                window.firestore.where('user_id', '==', userId),
+                window.firestore.where('category', '==', filterBy),
+                window.firestore.orderBy('date_of_service', 'desc')
+            );
         }
 
         const querySnapshot = await window.firestore.getDocs(q);
