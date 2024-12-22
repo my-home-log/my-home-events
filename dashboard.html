@@ -352,7 +352,8 @@ window.firestore = {
                 closeModal();
             }
         };
-async function loadUpcomingMaintenance(userId) {
+// Loading Upcoming function
+        async function loadUpcomingMaintenance(userId) {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
         // Calculate date range
@@ -409,6 +410,26 @@ async function loadUpcomingMaintenance(userId) {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
+       function createGoogleCalendarLink(title, date, description) {
+    const eventDate = new Date(date);
+    // Create an end date 1 hour after start
+    const endDate = new Date(eventDate);
+    endDate.setHours(endDate.getHours() + 1);
+    
+    const params = {
+        action: 'TEMPLATE',
+        text: title,
+        dates: `${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}`,
+        details: description
+    };
+    
+    const url = `https://calendar.google.com/calendar/render?${Object.keys(params)
+        .map(key => `${key}=${encodeURIComponent(params[key])}`)
+        .join('&')}`;
+    
+    return url;
+}
+        
         // Format date for display
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
