@@ -478,25 +478,25 @@ window.firestore = {
         <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <a href="${createCalendarLinks(
-                record.service_performed,
-                record.follow_up_date,
-                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-            ).googleUrl}" 
-            target="_blank" 
-            class="calendar-btn"
-            style="background-color: #488DE8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
-                🗓️ Google Calendar
-            </a>
-            <a href="${createCalendarLinks(
-                record.service_performed,
-                record.follow_up_date,
-                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-            ).iCalUrl}" 
-            download="maintenance-reminder.ics"
-            class="calendar-btn"
-            style="background-color: #A0B4BD; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
-                📅 Other Calendars
-            </a>
+    record.service_performed,
+    record.follow_up_date,
+    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+).googleUrl}" 
+target="_blank" 
+class="calendar-btn"
+style="background-color: #1a73e8; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px; font-size: 14px;">
+    🗓️ Google Calendar
+</a>
+<a href="${createCalendarLinks(
+    record.service_performed,
+    record.follow_up_date,
+    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+).iCalUrl}" 
+download="maintenance-reminder.ics"
+class="calendar-btn"
+style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 14px;">
+    📅 Other Calendars
+</a>
         </div>
     </div>
 `;
