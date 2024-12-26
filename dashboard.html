@@ -648,11 +648,12 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
     }
 }
        //load allservice by year list
-        async function loadYearSummary(userId) {
+        async function loadYearSummary(userId, propertyId) {
     try {
         const q = window.firestore.query(
             window.firestore.collection(window.db, 'serviceRecords'),
             window.firestore.where('user_id', '==', userId),
+            window.firestore.where('property_id', '==', propertyId),
             window.firestore.orderBy('date_of_service', 'desc')
         );
 
@@ -738,10 +739,15 @@ function updateYearStats(selectedYear, docs) {
 }
         
         //load allservices list
-        async function loadAllServices(userId, filterBy = 'date_desc') {
+        async function loadAllServices(userId, propertyId) {
     const tableBody = document.getElementById('allServicesTable');
     try {
-        let q;
+        const q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.where('property_id', '==', propertyId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
         
         if (filterBy === 'date_desc') {
             // Show all services sorted by date
