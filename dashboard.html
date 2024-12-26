@@ -244,6 +244,7 @@
             <thead>
                 <tr style="background-color: #A0B4BD;">
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
+                   <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Property</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vendor</th>
@@ -700,6 +701,7 @@ function filterByYear(year) {
     html += `
         <tr style="border-bottom: 0px solid #dee2e6;">
             <td style="padding: 12px;">${formatDate(record.date_of_service)}</td>
+            <td style="padding: 12px;">${record.property || 'Main Property'}</td>
             <td style="padding: 12px;">${record.category}</td>
             <td style="padding: 12px;">${record.service_performed}</td>
             <td style="padding: 12px;">${record.vendor_name || 'Not specified'}</td>
