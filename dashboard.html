@@ -439,27 +439,22 @@
     <script>
         // Adding additional properties
 async function loadProperties(userId) {
-    const propertySelect = document.getElementById('propertySelect');
     try {
-        const q = query(
-            collection(db, 'properties'),
-            where('user_id', '==', userId)
+        const q = window.firestore.query(
+            window.firestore.collection(window.db, 'properties'),
+            window.firestore.where('user_id', '==', userId)
         );
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await window.firestore.getDocs(q);
         
-        // Reset select options
+        const propertySelect = document.getElementById('propertySelect');
         propertySelect.innerHTML = `
             <option value="">Select Property</option>
             <option value="add">+ Add New Property</option>
         `;
         
-        // Add properties to select
         querySnapshot.forEach((doc) => {
             const property = doc.data();
-            propertySelect.add(
-                new Option(property.name, doc.id),
-                undefined
-            );
+            propertySelect.add(new Option(property.name, doc.id));
         });
     } catch (error) {
         console.error('Error loading properties:', error);
