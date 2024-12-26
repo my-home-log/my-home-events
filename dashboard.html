@@ -905,17 +905,13 @@ async function loadRecentServices(userId) {
 }
 
         // Submit service record
-        async function submitServiceRecord(event) {
+async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
+    const selectedProperty = document.getElementById('propertySelect').value;
     
-    if (!currentUser) {
-        alert('Please log in to save records');
-        return;
-    }
-
-    try {
-        const record = {
+    const record = {
+            property_id: selectedProperty,
             date_of_service: document.getElementById('serviceDate').value,
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
