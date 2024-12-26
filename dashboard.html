@@ -179,8 +179,9 @@
                 </div>
             </div>
         </div>
-       //yearlyservices
-<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; width: 100%; padding: 20px;">
+       
+        
+<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; max-width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">Year Summary</h3>
         <select id="yearFilter" onchange="filterByYear(this.value)" 
@@ -199,9 +200,29 @@
             </div>
         </div>
     </div>
+    <div class="table-container" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background-color: #f8f9fa;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vendor</th>
+                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600;">Cost</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Follow-up</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="yearSummaryTable">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">Select a year to view services</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-        //Allservices
+        
 <div class="dashboard-card" style="margin-top: 20px; max-width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">All Services</h3>
