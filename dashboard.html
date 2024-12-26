@@ -815,15 +815,10 @@ async function loadRecentServices(userId) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
     
-    if (!currentUser) {
-        alert('Please log in to save records');
-        return;
-    }
-
     try {
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
-             property_name: document.getElementById('propertyName').value || 'Not Specified',
+            property_name: document.getElementById('propertyName').value || 'Not Specified',
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
             notes: document.getElementById('serviceNotes').value,
@@ -835,16 +830,13 @@ async function loadRecentServices(userId) {
             created_at: new Date().toISOString()
         };
 
-        await window.firestore.addDoc(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            record
-        );
-
         // Refresh all sections
+        await window.firestore.addDoc(window.firestore.collection(window.db, 'serviceRecords'), record);
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(user.uid); // Add this line
         await loadAllServices(currentUser.uid);
+        await filterByProperty(document.getElementById('propertyFilter').value || 'all');
         
         alert('Service record saved successfully!');
         closeModal();
