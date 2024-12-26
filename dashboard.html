@@ -410,19 +410,18 @@
 
     // Auth state observer
     auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            console.log('User info:', user); // Debug log
-            document.getElementById('userName').textContent = user.displayName || user.email;
-            await loadProperties(user.uid);
-            const selectedProperty = localStorage.getItem('selectedProperty');
-            if (selectedProperty) {
-                document.getElementById('propertySelect').value = selectedProperty;
-                await loadAllData(selectedProperty);
-            }
-        } else {
-            window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+    if (user) {
+        document.getElementById('userName').textContent = user.displayName || user.email;
+        await loadProperties(user.uid);
+        const selectedProperty = localStorage.getItem('selectedProperty');
+        if (selectedProperty) {
+            document.getElementById('propertySelect').value = selectedProperty;
+            await loadAllData(selectedProperty);
         }
-    });
+    } else {
+        window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+    }
+});
 
         // Logout Functionality
         document.getElementById('logoutButton').addEventListener('click', async () => {
@@ -450,22 +449,26 @@
         
         // Adding additional properties
 async function loadProperties(userId) {
+    const propertySelect = document.getElementById('propertySelect');
     try {
         const q = window.firestore.query(
             window.firestore.collection(window.db, 'properties'),
             window.firestore.where('user_id', '==', userId)
         );
+        
         const querySnapshot = await window.firestore.getDocs(q);
         
-        const propertySelect = document.getElementById('propertySelect');
+        // Reset dropdown
         propertySelect.innerHTML = `
             <option value="">Select Property</option>
             <option value="add">+ Add New Property</option>
         `;
         
+        // Add properties to dropdown
         querySnapshot.forEach((doc) => {
             const property = doc.data();
-            propertySelect.add(new Option(property.name, doc.id));
+            const option = new Option(property.name, doc.id);
+            propertySelect.add(option);
         });
     } catch (error) {
         console.error('Error loading properties:', error);
