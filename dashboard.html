@@ -437,6 +437,17 @@
 
     <!-- Application Functions -->
     <script>
+        //Load All Data Property
+      async function loadAllData(propertyId) {
+    if (!propertyId) return;
+    
+    const userId = window.auth.currentUser.uid;
+    await loadRecentServices(userId, propertyId);
+    await loadUpcomingMaintenance(userId, propertyId);
+    await loadYearSummary(userId, propertyId);
+    await loadAllServices(userId, propertyId);
+}  
+        
         // Adding additional properties
 async function loadProperties(userId) {
     try {
