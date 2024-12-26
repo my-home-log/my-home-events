@@ -179,7 +179,29 @@
                 </div>
             </div>
         </div>
-        
+       //yearlyservices
+<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; width: 100%; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Year Summary</h3>
+        <select id="yearFilter" onchange="filterByYear(this.value)" 
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
+            <option value="all">All Years</option>
+            <!-- Years will be populated dynamically -->
+        </select>
+    </div>
+    <div class="summary-stats" style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Total Services:</strong> <span id="serviceCount">0</span>
+            </div>
+            <div>
+                <strong>Total Cost:</strong> <span id="totalCost">$0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+        //Allservices
 <div class="dashboard-card" style="margin-top: 20px; max-width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">All Services</h3>
@@ -337,7 +359,8 @@ window.firestore = {
         document.getElementById('userName').textContent = user.displayName || user.email;
         await loadRecentServices(user.uid);
         await loadUpcomingMaintenance(user.uid);
-        await loadAllServices(user.uid); // Add this line
+        await loadYearSummary(user.uid); // Add this line
+        await loadAllServices(user.uid);
     } else {
         window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
     }
@@ -462,7 +485,65 @@ window.firestore = {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-       //load allservices list
+     //loadYearlySummary
+       async function loadYearSummary(userId) {
+    try {
+        const q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
+
+        const querySnapshot = await window.firestore.getDocs(q);
+        const years = new Set();
+        const yearSelect = document.getElementById('yearFilter');
+        
+        // Collect all years from records
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            const year = new Date(record.date_of_service).getFullYear();
+            years.add(year);
+        });
+
+        // Populate year dropdown
+        yearSelect.innerHTML = '<option value="all">All Years</option>';
+        Array.from(years).sort((a, b) => b - a).forEach(year => {
+            yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+        });
+
+        updateYearStats('all', querySnapshot.docs);
+    } catch (error) {
+        console.error('Error loading year summary:', error);
+    }
+}
+
+function updateYearStats(selectedYear, docs) {
+    const serviceCount = document.getElementById('serviceCount');
+    const totalCost = document.getElementById('totalCost');
+    
+    let filteredDocs = docs;
+    if (selectedYear !== 'all') {
+        filteredDocs = docs.filter(doc => {
+            const record = doc.data();
+            return new Date(record.date_of_service).getFullYear() === parseInt(selectedYear);
+        });
+    }
+
+    const total = filteredDocs.reduce((sum, doc) => {
+        const record = doc.data();
+        return sum + (record.cost || 0);
+    }, 0);
+
+    serviceCount.textContent = filteredDocs.length;
+    totalCost.textContent = `$${total.toFixed(2)}`;
+}
+
+function filterByYear(year) {
+    const userId = window.auth.currentUser.uid;
+    loadAllServices(userId, year === 'all' ? 'date_desc' : year);
+}
+        
+        //load allservices list
         async function loadAllServices(userId, filterBy = 'date_desc') {
     const tableBody = document.getElementById('allServicesTable');
     try {
@@ -656,6 +737,7 @@ async function loadRecentServices(userId) {
         // Refresh all sections
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
+        await loadYearSummary(user.uid); // Add this line
         await loadAllServices(currentUser.uid);
         
         alert('Service record saved successfully!');
