@@ -795,7 +795,7 @@ async function loadRecentServices(userId) {
         // Refresh all sections
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
-        await loadYearSummary(user.uid); // Add this line
+        await loadYearSummary(currentUser.uid); // Add this line
         await loadAllServices(currentUser.uid);
         
         alert('Service record saved successfully!');
