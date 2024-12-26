@@ -158,8 +158,17 @@
         </div>
         
         <div class="welcome-message">
-            <h2>Welcome, <span id="userName">User</span>!</h2>
-        </div>
+    <h2>Welcome, <span id="userName">User</span>!</h2>
+</div>
+
+<div style="display: flex; justify-content: flex-end; margin: 20px 0;">
+    <select id="propertySelect" 
+            style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white; min-width: 200px;"
+            onchange="switchProperty(this.value)">
+        <option value="">Select Property</option>
+        <option value="add">+ Add New Property</option>
+    </select>
+</div>
 
         <div class="dashboard-content">
             <div class="dashboard-card">
@@ -339,6 +348,7 @@ import {
     limit,
     getDocs 
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -376,10 +386,12 @@ window.firestore = {
        auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('userName').textContent = user.displayName || user.email;
-        await loadRecentServices(user.uid);
-        await loadUpcomingMaintenance(user.uid);
-        await loadYearSummary(user.uid); // Add this line
-        await loadAllServices(user.uid);
+        await loadProperties(user.uid);
+        const selectedProperty = localStorage.getItem('selectedProperty');
+        if (selectedProperty) {
+            document.getElementById('propertySelect').value = selectedProperty;
+            await loadAllData(selectedProperty);
+        }
     } else {
         window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
     }
@@ -398,6 +410,54 @@ window.firestore = {
 
     <!-- Application Functions -->
     <script>
+        // Adding additional properties
+async function loadProperties(userId) {
+    const propertySelect = document.getElementById('propertySelect');
+    try {
+        const q = query(
+            collection(db, 'properties'),
+            where('user_id', '==', userId)
+        );
+        const querySnapshot = await getDocs(q);
+        
+        // Reset select options
+        propertySelect.innerHTML = `
+            <option value="">Select Property</option>
+            <option value="add">+ Add New Property</option>
+        `;
+        
+        // Add properties to select
+        querySnapshot.forEach((doc) => {
+            const property = doc.data();
+            propertySelect.add(
+                new Option(property.name, doc.id),
+                undefined
+            );
+        });
+    } catch (error) {
+        console.error('Error loading properties:', error);
+    }
+}
+
+async function switchProperty(propertyId) {
+    if (propertyId === 'add') {
+        showAddPropertyModal();
+        return;
+    }
+    if (propertyId) {
+        // Store selected property ID
+        localStorage.setItem('selectedProperty', propertyId);
+        // Reload all data for this property
+        await loadAllData(propertyId);
+    }
+}
+
+function showAddPropertyModal() {
+    // We'll create this modal next
+    alert('Add Property feature coming soon!');
+}
+        
+        
         // Modal control functions
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
