@@ -369,6 +369,8 @@ window.firestore = {
     addDoc,
     deleteDoc,
     doc,
+    getDoc,  // Add this
+    updateDoc, // Add this
     query,
     where,
     orderBy,
@@ -796,21 +798,25 @@ async function loadRecentServices(userId) {
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             html += `
-    <div class="service-record">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div>
-                <h4>${record.service_performed}</h4>
-                <p class="date">${formatDate(record.date_of_service)}</p>
-                <p><strong>Category:</strong> ${record.category}</p>
-                <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-                <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
-            </div>
-            <button onclick="deleteRecord('${doc.id}')" class="delete-btn" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+<div class="service-record">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <h4>${record.service_performed}</h4>
+            <p class="date">${formatDate(record.date_of_service)}</p>
+            <p><strong>Category:</strong> ${record.category}</p>
+            <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+            <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
+        </div>
+        <div>
+            <button onclick="openEditModal('${doc.id}')" style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
+                ✏️
+            </button>
+            <button onclick="deleteRecord('${doc.id}')" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
                 ❌
             </button>
         </div>
     </div>
-`;
+</div>`;
         });
 
         recentServicesDiv.innerHTML = html;
