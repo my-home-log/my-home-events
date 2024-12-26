@@ -366,16 +366,14 @@
        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { 
-    getFirestore, 
-    collection, 
+    getFirestore,
+    collection,
     addDoc,
-    deleteDoc,
-    doc, 
-    query, 
-    where, 
-    orderBy, 
-    limit,
-    getDocs 
+    getDocs,
+    query,
+    where,
+    orderBy,
+    limit
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         import { collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
@@ -402,13 +400,11 @@ import {
 window.firestore = {
     collection,
     addDoc,
-    deleteDoc,
-    doc,
+    getDocs,
     query,
     where,
     orderBy,
-    limit,
-    getDocs
+    limit
 };
 
         // Load recent services when user is authenticated
