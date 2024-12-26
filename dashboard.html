@@ -56,7 +56,7 @@
             padding: 20px;
         }
         .add-service-btn {
-            background-color: #488DE8;
+            background-color: #1a73e8;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -158,17 +158,8 @@
         </div>
         
         <div class="welcome-message">
-    <h2>Welcome, <span id="userName">User</span>!</h2>
-</div>
-
-<div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-    <select id="propertySelect" 
-            style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white; min-width: 200px;"
-            onchange="switchProperty(this.value)">
-        <option value="">Select Property</option>
-        <option value="add">+ Add New Property</option>
-    </select>
-</div>
+            <h2>Welcome, <span id="userName">User</span>!</h2>
+        </div>
 
         <div class="dashboard-content">
             <div class="dashboard-card">
@@ -189,47 +180,6 @@
             </div>
         </div>
         
-<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; max-width: 100%; padding: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0;">Year Summary</h3>
-        <select id="yearFilter" onchange="filterByYear(this.value)" 
-                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
-            <option value="all">All Years</option>
-            <!-- Years will be populated dynamically -->
-        </select>
-    </div>
-    <div class="summary-stats" style="margin-bottom: 15px; padding: 15px; background-color: #77A8E8; border-radius: 4px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <strong>Total Services:</strong> <span id="serviceCount">0</span>
-            </div>
-            <div>
-                <strong>Total Cost:</strong> <span id="totalCost">$0.00</span>
-            </div>
-        </div>
-    </div>
-    <div class="table-container" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-                <tr style="background-color: #f8f9fa;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vendor</th>
-                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600;">Cost</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Follow-up</th>
-                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="yearSummaryTable">
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 20px;">Select a year to view services</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-        
 <div class="dashboard-card" style="margin-top: 20px; max-width: 100%; padding: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0;">All Services</h3>
@@ -248,7 +198,7 @@
     <div class="table-container" style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
             <thead>
-                <tr style="background-color: #A0B4BD;">
+                <tr style="background-color: #f8f9fa;">
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
@@ -267,35 +217,6 @@
     </div>
 </div>
 
-<!-- Add Property Modal -->
-<div id="propertyModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button" onclick="closePropertyModal()">&times;</span>
-        <h2>Add New Property</h2>
-        <form id="propertyForm" onsubmit="submitProperty(event)">
-            <div class="form-group">
-                <label for="propertyName">Property Name*</label>
-                <input type="text" id="propertyName" required 
-                       placeholder="e.g., Main House, Rental Property">
-            </div>
-
-            <div class="form-group">
-                <label for="propertyAddress">Address</label>
-                <input type="text" id="propertyAddress" 
-                       placeholder="Property Address">
-            </div>
-
-            <div class="form-group">
-                <label for="propertyDetails">Property Details</label>
-                <textarea id="propertyDetails" 
-                         placeholder="e.g., 3BR/2BA, Built 2010, Square Footage"></textarea>
-            </div>
-
-            <button type="submit" class="add-service-btn">Save Property</button>
-        </form>
-    </div>
-</div>
-
         
         <!-- Service Record Modal -->
         <div id="serviceModal" class="modal">
@@ -308,8 +229,6 @@
                         <input type="date" id="serviceDate" required>
                     </div>
 
-
-                    
                     <div class="form-group">
                         <label for="serviceCategory">Service Category*</label>
                         <select id="serviceCategory" required>
@@ -365,59 +284,60 @@
 
     <!-- Firebase Integration -->
     <script type="module">
-    // Single import for each Firebase feature
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-    import { 
-        getFirestore,
-        collection,
-        addDoc,
-        getDocs,
-        query,
-        where,
-        orderBy,
-        limit
-    } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc,
+    deleteDoc,
+    doc, 
+    query, 
+    where, 
+    orderBy, 
+    limit,
+    getDocs 
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
-        authDomain: "my-home-events.firebaseapp.com",
-        projectId: "my-home-events",
-        storageBucket: "my-home-events.firestorage.app",
-        messagingSenderId: "132719765347",
-        appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
-        measurementId: "G-4TXVSJ70QW"
-    };
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
+        };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Make Firebase services available globally
-    window.auth = auth;
-    window.db = db;
-    window.firestore = {
-        collection,
-        addDoc,
-        getDocs,
-        query,
-        where,
-        orderBy,
-        limit
-    };
+        // Make Firebase services available globally
+        window.auth = auth;
+        window.db = db;
+        // Make Firebase services available globally
+window.firestore = {
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs
+};
 
-    // Auth state observer
-    auth.onAuthStateChanged(async (user) => {
+        // Load recent services when user is authenticated
+        auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('userName').textContent = user.displayName || user.email;
-        await loadProperties(user.uid);
-        const selectedProperty = localStorage.getItem('selectedProperty');
-        if (selectedProperty) {
-            document.getElementById('propertySelect').value = selectedProperty;
-            await loadAllData(selectedProperty);
-        }
+        await loadRecentServices(user.uid);
+        await loadUpcomingMaintenance(user.uid);
+        await loadAllServices(user.uid); // Add this line
     } else {
         window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
     }
@@ -436,64 +356,6 @@
 
     <!-- Application Functions -->
     <script>
-        //Load All Data Property
-      async function loadAllData(propertyId) {
-    if (!propertyId) return;
-    
-    const userId = window.auth.currentUser.uid;
-    await loadRecentServices(userId, propertyId);
-    await loadUpcomingMaintenance(userId, propertyId);
-    await loadYearSummary(userId, propertyId);
-    await loadAllServices(userId, propertyId);
-}  
-        
-        // Adding additional properties
-async function loadProperties(userId) {
-    const propertySelect = document.getElementById('propertySelect');
-    try {
-        const q = window.firestore.query(
-            window.firestore.collection(window.db, 'properties'),
-            window.firestore.where('user_id', '==', userId)
-        );
-        
-        const querySnapshot = await window.firestore.getDocs(q);
-        
-        // Reset dropdown
-        propertySelect.innerHTML = `
-            <option value="">Select Property</option>
-            <option value="add">+ Add New Property</option>
-        `;
-        
-        // Add properties to dropdown
-        querySnapshot.forEach((doc) => {
-            const property = doc.data();
-            const option = new Option(property.name, doc.id);
-            propertySelect.add(option);
-        });
-    } catch (error) {
-        console.error('Error loading properties:', error);
-    }
-}
-
-async function switchProperty(propertyId) {
-    if (propertyId === 'add') {
-        showAddPropertyModal();
-        return;
-    }
-    if (propertyId) {
-        // Store selected property ID
-        localStorage.setItem('selectedProperty', propertyId);
-        // Reload all data for this property
-        await loadAllData(propertyId);
-    }
-}
-
-function showAddPropertyModal() {
-    // We'll create this modal next
-    alert('Add Property feature coming soon!');
-}
-        
-        
         // Modal control functions
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
@@ -505,53 +367,7 @@ function showAddPropertyModal() {
             document.getElementById('serviceModal').style.display = 'none';
             document.getElementById('serviceForm').reset();
         }
-function showAddPropertyModal() {
-    document.getElementById('propertyModal').style.display = 'block';
-}
-
-function closePropertyModal() {
-    document.getElementById('propertyModal').style.display = 'none';
-    document.getElementById('propertyForm').reset();
-}
-//Property Modal
-async function submitProperty(event) {
-    event.preventDefault();
-    const currentUser = window.auth.currentUser;
-    
-    if (!currentUser) {
-        alert('Please log in to add properties');
-        return;
-    }
-
-    try {
-        const property = {
-            name: document.getElementById('propertyName').value,
-            address: document.getElementById('propertyAddress').value,
-            details: document.getElementById('propertyDetails').value,
-            user_id: currentUser.uid,
-            created_at: new Date().toISOString()
-        };
-
-        const docRef = await window.firestore.addDoc(
-            window.firestore.collection(window.db, 'properties'),
-            property
-        );
-
-        await loadProperties(currentUser.uid);
-        closePropertyModal();
-        
-        // Select the new property
-        document.getElementById('propertySelect').value = docRef.id;
-        await switchProperty(docRef.id);
-        
-        alert('Property added successfully!');
-    } catch (error) {
-        console.error('Error adding property:', error);
-        alert('Error adding property: ' + error.message);
-    }
-}
-        
-        // Delete record function
+// Delete record function
     async function deleteRecord(docId) {
         if (!confirm('Are you sure you want to delete this record?')) {
             return;
@@ -562,10 +378,6 @@ async function submitProperty(event) {
             await window.firestore.deleteDoc(docRef);
             // Refresh the list after deletion
             await loadRecentServices(window.auth.currentUser.uid);
-            await loadUpcomingMaintenance(window.auth.currentUser.uid);
-            await loadYearSummary(window.auth.currentUser.uid);
-            await loadAllServices(window.auth.currentUser.uid);
-            
             alert('Record deleted successfully');
         } catch (error) {
             console.error('Error deleting record:', error);
@@ -620,25 +432,25 @@ async function submitProperty(event) {
         <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <a href="${createCalendarLinks(
-    record.service_performed,
-    record.follow_up_date,
-    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-).googleUrl}" 
-target="_blank" 
-class="calendar-btn"
-style="background-color: #77A8E8; color: #fff; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px; font-size: 14px;">
-    Google Calendar 🗓️
-</a>
-<a href="${createCalendarLinks(
-    record.service_performed,
-    record.follow_up_date,
-    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-).iCalUrl}" 
-download="maintenance-reminder.ics"
-class="calendar-btn"
-style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 14px;">
-    Other Calendars 📅
-</a>
+                record.service_performed,
+                record.follow_up_date,
+                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            ).googleUrl}" 
+            target="_blank" 
+            class="calendar-btn"
+            style="background-color: #1a73e8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                🗓️ Google Calendar
+            </a>
+            <a href="${createCalendarLinks(
+                record.service_performed,
+                record.follow_up_date,
+                `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            ).iCalUrl}" 
+            download="maintenance-reminder.ics"
+            class="calendar-btn"
+            style="background-color: #34C759; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                📅 Other Calendars
+            </a>
         </div>
     </div>
 `;
@@ -650,107 +462,11 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-       //load allservice by year list
-        async function loadYearSummary(userId, propertyId) {
-    try {
-        const q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId),
-            window.firestore.where('property_id', '==', propertyId),
-            window.firestore.orderBy('date_of_service', 'desc')
-        );
-
-        const querySnapshot = await window.firestore.getDocs(q);
-        const years = new Set();
-        const yearSelect = document.getElementById('yearFilter');
-        
-        // Collect all years from records
-        querySnapshot.forEach((doc) => {
-            const record = doc.data();
-            const year = new Date(record.date_of_service).getFullYear();
-            years.add(year);
-        });
-
-        // Populate year dropdown
-        yearSelect.innerHTML = '<option value="all">All Years</option>';
-        Array.from(years).sort((a, b) => b - a).forEach(year => {
-            yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
-        });
-
-        updateYearStats('all', querySnapshot.docs);
-    } catch (error) {
-        console.error('Error loading year summary:', error);
-    }
-}
-
-function updateYearStats(selectedYear, docs) {
-    const serviceCount = document.getElementById('serviceCount');
-    const totalCost = document.getElementById('totalCost');
-    const tableBody = document.getElementById('yearSummaryTable');
-    
-    let filteredDocs = docs;
-    if (selectedYear !== 'all') {
-        filteredDocs = docs.filter(doc => {
-            const record = doc.data();
-            return new Date(record.date_of_service).getFullYear() === parseInt(selectedYear);
-        });
-    }
-
-    const total = filteredDocs.reduce((sum, doc) => {
-        const record = doc.data();
-        return sum + (record.cost || 0);
-    }, 0);
-
-    serviceCount.textContent = filteredDocs.length;
-    totalCost.textContent = `$${total.toFixed(2)}`;
-
-    // Update table
-    if (filteredDocs.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found for this period</td></tr>';
-        return;
-    }
-
-    let html = '';
-    filteredDocs.forEach((doc) => {
-        const record = doc.data();
-        html += `
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px;">${formatDate(record.date_of_service)}</td>
-                <td style="padding: 12px;">${record.category}</td>
-                <td style="padding: 12px;">${record.service_performed}</td>
-                <td style="padding: 12px;">${record.vendor_name || 'Not specified'}</td>
-                <td style="padding: 12px; text-align: right;">$${record.cost?.toFixed(2) || '0.00'}</td>
-                <td style="padding: 12px;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-                <td style="padding: 12px; text-align: center;">
-                    <button onclick="deleteRecord('${doc.id}')" 
-                            style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
-                        ❌
-                    </button>
-                </td>
-            </tr>
-            ${record.notes ? `
-            <tr style="border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">
-                <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                    <strong>Notes:</strong> ${record.notes}
-                </td>
-            </tr>
-            ` : ''}
-        `;
-    });
-
-    tableBody.innerHTML = html;
-}
-        
-        //load allservices list
-        async function loadAllServices(userId, propertyId) {
+       //load allservices list
+        async function loadAllServices(userId, filterBy = 'date_desc') {
     const tableBody = document.getElementById('allServicesTable');
     try {
-        const q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId),
-            window.firestore.where('property_id', '==', propertyId),
-            window.firestore.orderBy('date_of_service', 'desc')
-        );
+        let q;
         
         if (filterBy === 'date_desc') {
             // Show all services sorted by date
@@ -856,6 +572,7 @@ END:VCALENDAR`;
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
+        // Load recent services
        // Load recent services
 async function loadRecentServices(userId) {
     const recentServicesDiv = document.getElementById('recentServices');
@@ -908,13 +625,17 @@ async function loadRecentServices(userId) {
 }
 
         // Submit service record
-async function submitServiceRecord(event) {
+        async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
-    const selectedProperty = document.getElementById('propertySelect').value;
     
-    const record = {
-            property_id: selectedProperty,
+    if (!currentUser) {
+        alert('Please log in to save records');
+        return;
+    }
+
+    try {
+        const record = {
             date_of_service: document.getElementById('serviceDate').value,
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
@@ -935,7 +656,6 @@ async function submitServiceRecord(event) {
         // Refresh all sections
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
-        await loadYearSummary(user.uid); // Add this line
         await loadAllServices(currentUser.uid);
         
         alert('Service record saved successfully!');
@@ -947,4 +667,4 @@ async function submitServiceRecord(event) {
 }
     </script>
 </body>
-</html>
+</html></html>
