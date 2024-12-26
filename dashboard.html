@@ -425,12 +425,10 @@ window.firestore = {
     const userId = window.auth.currentUser.uid;
     
     // Update all sections with property filter
-    await loadUniqueProperties(user.uid);
-        await filterByProperty('all');
-        await loadRecentServices(user.uid);
-        await loadUpcomingMaintenance(user.uid);
-        await loadYearSummary(user.uid); // Add this line
-        await loadAllServices(user.uid);
+    await loadRecentServices(userId, propertyName);
+    await loadUpcomingMaintenance(userId, propertyName);
+    await loadYearSummary(userId, propertyName);
+    await loadAllServices(userId, propertyName);
 }
 //loadproperties
 async function loadUniqueProperties(userId) {
@@ -470,13 +468,8 @@ async function loadUniqueProperties(userId) {
             const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
             await window.firestore.deleteDoc(docRef);
             // Refresh the list after deletion
+            await loadRecentServices(window.auth.currentUser.uid);
             alert('Record deleted successfully');
-            await loadUniqueProperties(user.uid);
-        await filterByProperty('all');
-        await loadRecentServices(user.uid);
-        await loadUpcomingMaintenance(user.uid);
-        await loadYearSummary(user.uid); // Add this line
-        await loadAllServices(user.uid);
         } catch (error) {
             console.error('Error deleting record:', error);
             alert('Error deleting record');
@@ -848,13 +841,10 @@ async function loadRecentServices(userId) {
         );
 
         // Refresh all sections
-        alert('Service record saved successfully!');
-        await loadUniqueProperties(user.uid);
-        await filterByProperty('all');
-        await loadRecentServices(user.uid);
-        await loadUpcomingMaintenance(user.uid);
+        await loadRecentServices(currentUser.uid);
+        await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(user.uid); // Add this line
-        await loadAllServices(user.uid);
+        await loadAllServices(currentUser.uid);
         
         alert('Service record saved successfully!');
         closeModal();
@@ -866,3 +856,4 @@ async function loadRecentServices(userId) {
     </script>
 </body>
 </html></html>
+
