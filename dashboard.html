@@ -205,6 +205,7 @@
             <thead>
                 <tr style="background-color: #f8f9fa;">
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Date</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Property</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Category</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Service</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vendor</th>
@@ -271,7 +272,10 @@
                         <label for="serviceDate">Date of Service*</label>
                         <input type="date" id="serviceDate" required>
                     </div>
-
+<div class="form-group">
+    <label for="property">Property</label>
+    <input type="text" id="property" placeholder="e.g., Main House, Rental Unit 1">
+</div>
                     <div class="form-group">
                         <label for="serviceCategory">Service Category*</label>
                         <select id="serviceCategory" required>
@@ -407,8 +411,9 @@ window.firestore = {
         // Modal control functions
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
+           document.getElementById('property').value = record.property || ''; 
             // Set today's date as default
-            document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+            //document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
         }
 
         function closeModal() {
@@ -618,6 +623,7 @@ function updateYearStats(selectedYear, docs) {
         html += `
             <tr style="border-bottom: 1px solid #dee2e6;">
                 <td style="padding: 12px;">${formatDate(record.date_of_service)}</td>
+                <td style="padding: 12px;">${record.property || 'Main Property'}</td>
                 <td style="padding: 12px;">${record.category}</td>
                 <td style="padding: 12px;">${record.service_performed}</td>
                 <td style="padding: 12px;">${record.vendor_name || 'Not specified'}</td>
@@ -842,6 +848,7 @@ async function loadRecentServices(userId) {
         
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
+            property: document.getElementById('property').value || 'Main Property', // Add this
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
             notes: document.getElementById('serviceNotes').value,
