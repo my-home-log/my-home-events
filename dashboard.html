@@ -421,10 +421,7 @@ window.firestore = {
             const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
             await window.firestore.deleteDoc(docRef);
             // Refresh the list after deletion
-            await loadRecentServices(user.uid);
-        await loadUpcomingMaintenance(user.uid);
-        await loadYearSummary(user.uid); // Add this line
-        await loadAllServices(user.uid);
+            await loadRecentServices(window.auth.currentUser.uid);
             alert('Record deleted successfully');
         } catch (error) {
             console.error('Error deleting record:', error);
@@ -811,4 +808,3 @@ async function loadRecentServices(userId) {
     </script>
 </body>
 </html></html>
-
