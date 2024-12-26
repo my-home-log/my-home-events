@@ -649,24 +649,22 @@ function filterByYear(year) {
 }
         
         //load allservices list
-        async function loadAllServices(userId, filterBy = 'date_desc') {
+        aasync function loadAllServices(userId, propertyName = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
         let q;
         
-        if (filterBy === 'date_desc') {
-            // Show all services sorted by date
+        if (propertyName === 'all') {
             q = window.firestore.query(
                 window.firestore.collection(window.db, 'serviceRecords'),
                 window.firestore.where('user_id', '==', userId),
                 window.firestore.orderBy('date_of_service', 'desc')
             );
         } else {
-            // Filter by category
             q = window.firestore.query(
                 window.firestore.collection(window.db, 'serviceRecords'),
                 window.firestore.where('user_id', '==', userId),
-                window.firestore.where('category', '==', filterBy),
+                window.firestore.where('property_name', '==', propertyName),
                 window.firestore.orderBy('date_of_service', 'desc')
             );
         }
