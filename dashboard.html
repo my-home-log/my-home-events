@@ -412,8 +412,12 @@ window.firestore = {
 };
 
         // Load recent services when user is authenticated
-       auth.onAuthStateChanged(async (user) => {
+      auth.onAuthStateChanged(async (user) => {
     if (user) {
+        console.log('User info:', user); // Debug log
+        console.log('Display name:', user.displayName); // Debug log
+        console.log('Email:', user.email); // Debug log
+        
         document.getElementById('userName').textContent = user.displayName || user.email;
         await loadProperties(user.uid);
         const selectedProperty = localStorage.getItem('selectedProperty');
