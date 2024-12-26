@@ -525,7 +525,9 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         const years = new Set();
         const yearSelect = document.getElementById('yearFilter');
         
-        // Collect all years from records
+        // Store docs globally for filtering
+        window.yearSummaryDocs = querySnapshot.docs;
+        
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             const year = new Date(record.date_of_service).getFullYear();
@@ -604,7 +606,11 @@ function updateYearStats(selectedYear, docs) {
 
 function filterByYear(year) {
     const userId = window.auth.currentUser.uid;
-    loadAllServices(userId, year === 'all' ? 'date_desc' : year);
+    // Update year summary stats
+    const docs = window.yearSummaryDocs; // Store docs globally
+    updateYearStats(year, docs);
+    // Update all services with the same filter
+    loadAllServices(userId, year === 'all' ? 'date_desc' : 'Plumbing'); 
 }
         
         //load allservices list
