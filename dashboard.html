@@ -848,15 +848,15 @@ END:VCALENDAR`;
     async function loadRecentServices(userId, property = 'all') {
     const recentServicesDiv = document.getElementById('recentServices');
     try {
+        // Base query: Filter by user_id and order by date_of_service
         let q = window.firestore.query(
-    window.firestore.collection(window.db, 'serviceRecords'),
-    window.firestore.where('user_id', '==', userId),
-    window.firestore.where('property', '==', property),
-    window.firestore.orderBy('date_of_service', 'desc'),
-    window.firestore.limit(3)
-);
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc'),
+            window.firestore.limit(3)
+        );
 
-
+        // Add property filter only if a specific property is selected
         if (property !== 'all') {
             q = window.firestore.query(
                 q,
@@ -864,13 +864,16 @@ END:VCALENDAR`;
             );
         }
 
+        // Execute the query
         const querySnapshot = await window.firestore.getDocs(q);
 
+        // Handle empty results
         if (querySnapshot.empty) {
-            recentServicesDiv.innerHTML = '<p>No service records found for this property.</p>';
+            recentServicesDiv.innerHTML = '<p>No service records found.</p>';
             return;
         }
 
+        // Build HTML for service records
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
@@ -895,12 +898,14 @@ END:VCALENDAR`;
 </div>`;
         });
 
+        // Update the Recent Services section
         recentServicesDiv.innerHTML = html;
     } catch (error) {
         console.error('Error loading recent services:', error);
         recentServicesDiv.innerHTML = '<p>Error loading recent services. Please try again.</p>';
     }
 }
+
 
 
 // Submit service record
