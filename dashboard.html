@@ -399,6 +399,7 @@ window.firestore = {
         auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('userName').textContent = user.displayName || user.email;
+        await populatePropertyFilter(user.uid); // Call to populate dropdown
         await loadRecentServices(user.uid);
         await loadUpcomingMaintenance(user.uid);
         await loadYearSummary(user.uid); // Add this line
@@ -484,6 +485,7 @@ window.firestore = {
         const userId = window.auth.currentUser.uid;
         
 // Refresh all sections
+        await populatePropertyFilter(user.uid); // Call to populate dropdown
         await loadRecentServices(userId);
         await loadUpcomingMaintenance(userId);
         await loadYearSummary(userId);
@@ -513,6 +515,43 @@ window.firestore = {
     loadYearSummary(userId, property);
     loadAllServices(userId, property);
 }
+        
+//populatepropertyfilter
+    async function populatePropertyFilter(userId) {
+    const propertyFilter = document.getElementById('propertyFilter');
+    try {
+        // Fetch all service records for the user
+        const q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId)
+        );
+
+        const querySnapshot = await window.firestore.getDocs(q);
+
+        // Use a Set to ensure unique property names
+        const properties = new Set(['All Properties']); // Default option
+
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            if (record.property) {
+                properties.add(record.property);
+            }
+        });
+
+        // Populate the dropdown
+        propertyFilter.innerHTML = ''; // Clear existing options
+        properties.forEach((property) => {
+            const option = document.createElement('option');
+            option.value = property === 'All Properties' ? 'all' : property;
+            option.textContent = property;
+            propertyFilter.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating property filter:', error);
+        propertyFilter.innerHTML = '<option value="all">Error loading properties</option>';
+    }
+}
+
         
 // Loading Upcoming Maintenance function
         
