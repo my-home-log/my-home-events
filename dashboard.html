@@ -556,24 +556,23 @@ window.firestore = {
         
 // Loading Upcoming Maintenance function
         
-       async function loadUpcomingMaintenance(userId, property = 'all') {
+async function loadUpcomingMaintenance(userId, property = 'all') {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
         const today = new Date();
         const sixMonthsFromNow = new Date();
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
 
+        // Base query for user_id and follow_up_date range
         let q = window.firestore.query(
-    window.firestore.collection(window.db, 'serviceRecords'),
-    window.firestore.where('user_id', '==', userId),
-    window.firestore.where('property', '==', property),
-    window.firestore.where('follow_up_date', '>=', todayStr),
-    window.firestore.where('follow_up_date', '<=', futureStr),
-    window.firestore.orderBy('follow_up_date', 'asc'),
-    window.firestore.limit(3)
-);
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.where('follow_up_date', '>=', today.toISOString().split('T')[0]),
+            window.firestore.where('follow_up_date', '<=', sixMonthsFromNow.toISOString().split('T')[0]),
+            window.firestore.orderBy('follow_up_date', 'asc')
+        );
 
-
+        // Add property filter only if not "all"
         if (property !== 'all') {
             q = window.firestore.query(
                 q,
@@ -584,7 +583,7 @@ window.firestore = {
         const querySnapshot = await window.firestore.getDocs(q);
 
         if (querySnapshot.empty) {
-            maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled for this property.</p>';
+            maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled.</p>';
             return;
         }
 
@@ -592,12 +591,13 @@ window.firestore = {
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             html += `
-<div class="service-record">
-    <h4>${record.service_performed}</h4>
-    <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
-    <p><strong>Category:</strong> ${record.category}</p>
-    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-</div>`;
+                <div class="service-record">
+                    <h4>${record.service_performed}</h4>
+                    <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
+                    <p><strong>Category:</strong> ${record.category}</p>
+                    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+                </div>
+            `;
         });
 
         maintenanceDiv.innerHTML = html;
@@ -606,6 +606,7 @@ window.firestore = {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
+
 
 // loadYearlySummary
         
