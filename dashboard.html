@@ -610,17 +610,16 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
 // loadYearlySummary
         
-       async function loadYearSummary(userId, property = 'all') {
+      async function loadYearSummary(userId, property = 'all') {
     try {
+        // Base query: Filter by user_id and order by date_of_service
         let q = window.firestore.query(
-    window.firestore.collection(window.db, 'serviceRecords'),
-    window.firestore.where('user_id', '==', userId),
-    window.firestore.where('property', '==', property),
-    window.firestore.orderBy('date_of_service', 'desc')
-);
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
 
-
-        // Add property filter if not "all"
+        // Add property filter only if a specific property is selected
         if (property !== 'all') {
             q = window.firestore.query(
                 q,
@@ -628,7 +627,20 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             );
         }
 
+        // Execute the query
         const querySnapshot = await window.firestore.getDocs(q);
+
+        // Handle empty results
+        if (querySnapshot.empty) {
+            console.log('No records found for the selected property or year.');
+            document.getElementById('yearSummaryTable').innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 20px;">No records found.</td>
+                </tr>`;
+            return;
+        }
+
+        // Collect unique years from the results
         const years = new Set();
         const yearSelect = document.getElementById('yearFilter');
 
@@ -641,17 +653,23 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             years.add(year);
         });
 
-        // Populate year dropdown
+        // Populate the year dropdown
         yearSelect.innerHTML = '<option value="all">All Years</option>';
         Array.from(years).sort((a, b) => b - a).forEach((year) => {
             yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
         });
 
+        // Update year summary stats for "All Years"
         updateYearStats('all', querySnapshot.docs);
     } catch (error) {
         console.error('Error loading year summary:', error);
+        document.getElementById('yearSummaryTable').innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px;">Error loading year summary.</td>
+            </tr>`;
     }
 }
+
 
 
 // Update Year Stats        
