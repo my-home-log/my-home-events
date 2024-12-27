@@ -208,28 +208,30 @@
             </div>
         </div>
     </div>
-    <div class="table-container" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-                <tr style="background-color: #f8f9fa;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Date</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Property</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Category</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Service</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
-                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
-                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="yearSummaryTable">
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 20px;">Select a year to view services</td>
-                </tr>
-            </tbody>
-        </table>
+    <button id="toggleYearSummary" class="add-service-btn" style="width: 100%; margin-bottom: 10px;">View Events</button>
+    <div id="yearSummaryTableContainer" style="display: none;">
+        <div class="table-container" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Date</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Property</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Category</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Service</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="yearSummaryTable">
+                    <!-- Table rows populated dynamically -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
 
         
 <div class="dashboard-card" style="margin-top: 20px; max-width: 100%; padding: 20px;">
