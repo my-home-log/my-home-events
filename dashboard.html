@@ -148,6 +148,21 @@
             color: #666;
             font-size: 12px;
         }
+    #toggleYearSummary {
+    background-color: #609BE8;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+}
+
+    #toggleYearSummary:hover {
+    background-color: #1557b0;
+}
+
     </style>
 </head>
 <body>
@@ -696,6 +711,25 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     serviceCount.textContent = filteredDocs.length;
     totalCost.textContent = `$${total.toFixed(2)}`;
 
+//toggle for summary table
+    document.addEventListener('DOMContentLoaded', () => {
+        // Existing onload functionality...
+
+        // Toggle Year Summary Table
+        const toggleButton = document.getElementById('toggleYearSummary');
+        const tableContainer = document.getElementById('yearSummaryTableContainer');
+
+        toggleButton.addEventListener('click', () => {
+            if (tableContainer.style.display === 'none') {
+                tableContainer.style.display = 'block';
+                toggleButton.textContent = 'Hide Events';
+            } else {
+                tableContainer.style.display = 'none';
+                toggleButton.textContent = 'View Events';
+            }
+        });
+    });
+        
 // Update table
     if (filteredDocs.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found for this period</td></tr>';
