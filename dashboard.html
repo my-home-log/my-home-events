@@ -687,7 +687,24 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     }
 }
 
+//toggle for summary table
+    document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('toggleYearSummary');
+    const tableContainer = document.getElementById('yearSummaryTableContainer');
 
+    toggleButton.addEventListener('click', () => {
+        console.log("Button clicked"); // Check if the button is being clicked
+        if (tableContainer.style.display === 'none') {
+            console.log("Showing table"); // Confirm this branch is reached
+            tableContainer.style.display = 'block';
+            toggleButton.textContent = 'Hide Events';
+        } else {
+            console.log("Hiding table"); // Confirm this branch is reached
+            tableContainer.style.display = 'none';
+            toggleButton.textContent = 'View Events';
+        }
+    });
+});
 
 // Update Year Stats        
     function updateYearStats(selectedYear, docs) {
@@ -711,24 +728,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     serviceCount.textContent = filteredDocs.length;
     totalCost.textContent = `$${total.toFixed(2)}`;
 
-//toggle for summary table
-    document.addEventListener('DOMContentLoaded', () => {
-    const toggleButton = document.getElementById('toggleYearSummary');
-    const tableContainer = document.getElementById('yearSummaryTableContainer');
 
-    toggleButton.addEventListener('click', () => {
-        console.log("Button clicked"); // Check if the button is being clicked
-        if (tableContainer.style.display === 'none') {
-            console.log("Showing table"); // Confirm this branch is reached
-            tableContainer.style.display = 'block';
-            toggleButton.textContent = 'Hide Events';
-        } else {
-            console.log("Hiding table"); // Confirm this branch is reached
-            tableContainer.style.display = 'none';
-            toggleButton.textContent = 'View Events';
-        }
-    });
-});
 
 
         
