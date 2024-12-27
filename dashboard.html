@@ -840,6 +840,13 @@ async function loadAllServices(userId, year = 'all') {
                         </button>
                     </td>
                 </tr>
+                ${record.notes ? `
+                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
+                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
+                        <strong>Notes:</strong> ${record.notes}
+                    </td>
+                </tr>
+                ` : ''}
             `;
         });
 
