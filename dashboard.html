@@ -970,7 +970,7 @@ END:VCALENDAR`;
         }
 
 // Refresh all sections
-        await populatePropertyFilter(userId); // Update property dropdown dynamically
+        await populatePropertyFilter(currentUser.uid); // Update property dropdown dynamically
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(currentUser.uid);
