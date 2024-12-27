@@ -778,18 +778,19 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         
     function filterByYear(year) {
     const userId = window.auth.currentUser.uid;
+
     // Update year summary stats
     const docs = window.yearSummaryDocs; // Store docs globally
     updateYearStats(year, docs);
 
-// Update all services with the same filter
-        
-    loadAllServices(userId, year === 'all' ? 'date_desc' : 'Plumbing'); 
+    // Load all services for the selected year or all years
+    loadAllServices(userId, year === 'all' ? 'all' : year);
 }
+
         
 //load allservices list
         
-async function loadAllServices(userId, property = 'all') {
+async function loadAllServices(userId, year = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
         let q = window.firestore.query(
@@ -798,18 +799,21 @@ async function loadAllServices(userId, property = 'all') {
             window.firestore.orderBy('date_of_service', 'desc')
         );
 
-        // Add property filter if not "all"
-        if (property !== 'all') {
+        // Filter by year if not "all"
+        if (year !== 'all') {
+            const startOfYear = new Date(`${year}-01-01`).toISOString();
+            const endOfYear = new Date(`${year}-12-31`).toISOString();
             q = window.firestore.query(
                 q,
-                window.firestore.where('property', '==', property)
+                window.firestore.where('date_of_service', '>=', startOfYear),
+                window.firestore.where('date_of_service', '<=', endOfYear)
             );
         }
 
         const querySnapshot = await window.firestore.getDocs(q);
 
         if (querySnapshot.empty) {
-            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found for this property.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found for this property or year.</td></tr>';
             return;
         }
 
@@ -836,13 +840,6 @@ async function loadAllServices(userId, property = 'all') {
                         </button>
                     </td>
                 </tr>
-                ${record.notes ? `
-                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
-                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                        <strong>Notes:</strong> ${record.notes}
-                    </td>
-                </tr>
-                ` : ''}
             `;
         });
 
@@ -852,6 +849,7 @@ async function loadAllServices(userId, property = 'all') {
         tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Error loading services.</td></tr>';
     }
 }
+
 
 
 //sortServices for load All Services
