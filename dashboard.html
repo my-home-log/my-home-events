@@ -713,22 +713,27 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
 //toggle for summary table
     document.addEventListener('DOMContentLoaded', () => {
-        // Existing onload functionality...
+    console.log("Script loaded and DOM content is ready.");
 
-        // Toggle Year Summary Table
-        const toggleButton = document.getElementById('toggleYearSummary');
-        const tableContainer = document.getElementById('yearSummaryTableContainer');
+    const toggleButton = document.getElementById('toggleYearSummary');
+    const tableContainer = document.getElementById('yearSummaryTableContainer');
 
-        toggleButton.addEventListener('click', () => {
-            if (tableContainer.style.display === 'none') {
-                tableContainer.style.display = 'block';
-                toggleButton.textContent = 'Hide Events';
-            } else {
-                tableContainer.style.display = 'none';
-                toggleButton.textContent = 'View Events';
-            }
-        });
+    if (!toggleButton || !tableContainer) {
+        console.error("Toggle button or table container not found.");
+    }
+
+    toggleButton.addEventListener('click', () => {
+        console.log("Button clicked.");
+        if (tableContainer.style.display === 'none') {
+            tableContainer.style.display = 'block';
+            toggleButton.textContent = 'Hide Events';
+        } else {
+            tableContainer.style.display = 'none';
+            toggleButton.textContent = 'View Events';
+        }
     });
+});
+
         
 // Update table
     if (filteredDocs.length === 0) {
