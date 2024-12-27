@@ -717,10 +717,13 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     const tableContainer = document.getElementById('yearSummaryTableContainer');
 
     toggleButton.addEventListener('click', () => {
+        console.log("Button clicked"); // Check if the button is being clicked
         if (tableContainer.style.display === 'none') {
+            console.log("Showing table"); // Confirm this branch is reached
             tableContainer.style.display = 'block';
             toggleButton.textContent = 'Hide Events';
         } else {
+            console.log("Hiding table"); // Confirm this branch is reached
             tableContainer.style.display = 'none';
             toggleButton.textContent = 'View Events';
         }
