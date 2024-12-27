@@ -713,17 +713,10 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
 //toggle for summary table
     document.addEventListener('DOMContentLoaded', () => {
-    console.log("Script loaded and DOM content is ready.");
-
     const toggleButton = document.getElementById('toggleYearSummary');
     const tableContainer = document.getElementById('yearSummaryTableContainer');
 
-    if (!toggleButton || !tableContainer) {
-        console.error("Toggle button or table container not found.");
-    }
-
     toggleButton.addEventListener('click', () => {
-        console.log("Button clicked.");
         if (tableContainer.style.display === 'none') {
             tableContainer.style.display = 'block';
             toggleButton.textContent = 'Hide Events';
@@ -733,6 +726,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         }
     });
 });
+
 
         
 // Update table
