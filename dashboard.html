@@ -624,7 +624,7 @@ function updateYearStats(selectedYear, docs) {
     filteredDocs.forEach((doc) => {
         const record = doc.data();
         html += `
-            <tr style="border-bottom: 1px solid #dee2e6;">
+            <tr style="border-bottom: 0px solid #dee2e6;">
                 <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
                 <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
                 <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
@@ -644,7 +644,7 @@ function updateYearStats(selectedYear, docs) {
 </td>
             </tr>
             ${record.notes ? `
-            <tr style="border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">
+            <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
                 <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
                     <strong>Notes:</strong> ${record.notes}
                 </td>
