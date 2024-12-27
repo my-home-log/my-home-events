@@ -54,4 +54,17 @@ export const firestore = {
 // Also keep the global assignments:
 window.auth = auth;
 window.db = db;
-window.firestore = firestore;
+window.firestore = {
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    getDoc,
+    updateDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    onSnapshot
+};
