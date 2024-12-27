@@ -330,7 +330,8 @@
         </div>
     </div>
 
-    <!-- Firebase Integration -->
+<!-- Firebase Integration -->
+    
     <script type="module">
        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -350,7 +351,7 @@ import {
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
         
-        // Firebase Configuration
+// Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
             authDomain: "my-home-events.firebaseapp.com",
@@ -361,7 +362,7 @@ import {
             measurementId: "G-4TXVSJ70QW"
         };
 
-        // Initialize Firebase
+// Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -385,7 +386,8 @@ window.firestore = {
     onSnapshot
 };
 
-        // Load recent services when user is authenticated
+// Load recent services when user is authenticated
+        
         auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('userName').textContent = user.displayName || user.email;
@@ -398,7 +400,8 @@ window.firestore = {
     }
 });
 
-        // Logout Functionality
+// Logout Functionality
+        
         document.getElementById('logoutButton').addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -409,9 +412,11 @@ window.firestore = {
         });
     </script>
 
-    <!-- Application Functions -->
+<!-- Application Functions -->
     <script>
-        // Modal control functions
+        
+// Modal control functions
+        
         function openModal() {
             document.getElementById('serviceModal').style.display = 'block';
            document.getElementById('property').value = record.property || ''; 
@@ -428,7 +433,9 @@ window.firestore = {
     submitButton.textContent = 'Save Record';
     submitButton.removeAttribute('data-doc-id');
 }
-//Edit Record
+
+// Edit Record
+        
       async function openEditModal(docId) {
     const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
     const docSnap = await window.firestore.getDoc(docRef);
@@ -449,16 +456,15 @@ window.firestore = {
     const submitButton = document.querySelector('.modal-content .add-service-btn');
     submitButton.textContent = 'Update Record';
     
-    // Store docId for update
+// Store docId for update
     submitButton.setAttribute('data-doc-id', docId);
 
-    // Show modal
+// Show modal
     document.getElementById('serviceModal').style.display = 'block';
 }  
         
+// Delete record function
         
-        
-        // Delete record function
     async function deleteRecord(docId) {
     if (!confirm('Are you sure you want to delete this record?')) {
         return;
@@ -469,7 +475,7 @@ window.firestore = {
         await window.firestore.deleteDoc(docRef);
         const userId = window.auth.currentUser.uid;
         
-        // Refresh all sections
+// Refresh all sections
         await loadRecentServices(userId);
         await loadUpcomingMaintenance(userId);
         await loadYearSummary(userId);
@@ -481,7 +487,7 @@ window.firestore = {
         alert('Error deleting record');
     }
 }
-        // Close modal when clicking outside
+// Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('serviceModal');
             if (event.target === modal) {
@@ -489,7 +495,8 @@ window.firestore = {
             }
         };
 
-        // Loading Upcoming Maintenance function
+// Loading Upcoming Maintenance function
+        
         async function loadUpcomingMaintenance(userId) {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
@@ -559,7 +566,8 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-     //loadYearlySummary
+// loadYearlySummary
+        
        async function loadYearSummary(userId) {
     try {
         const q = window.firestore.query(
@@ -581,7 +589,7 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
             years.add(year);
         });
 
-        // Populate year dropdown
+// Populate year dropdown
         yearSelect.innerHTML = '<option value="all">All Years</option>';
         Array.from(years).sort((a, b) => b - a).forEach(year => {
             yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
@@ -593,7 +601,8 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
     }
 }
 
-function updateYearStats(selectedYear, docs) {
+// Update Year Stats        
+    function updateYearStats(selectedYear, docs) {
     const serviceCount = document.getElementById('serviceCount');
     const totalCost = document.getElementById('totalCost');
     const tableBody = document.getElementById('yearSummaryTable');
@@ -614,7 +623,7 @@ function updateYearStats(selectedYear, docs) {
     serviceCount.textContent = filteredDocs.length;
     totalCost.textContent = `$${total.toFixed(2)}`;
 
-    // Update table
+// Update table
     if (filteredDocs.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found for this period</td></tr>';
         return;
@@ -656,16 +665,21 @@ function updateYearStats(selectedYear, docs) {
     tableBody.innerHTML = html;
 }
 
-function filterByYear(year) {
+//filterByYear
+        
+    function filterByYear(year) {
     const userId = window.auth.currentUser.uid;
     // Update year summary stats
     const docs = window.yearSummaryDocs; // Store docs globally
     updateYearStats(year, docs);
-    // Update all services with the same filter
+
+// Update all services with the same filter
+        
     loadAllServices(userId, year === 'all' ? 'date_desc' : 'Plumbing'); 
 }
         
-        //load allservices list
+//load allservices list
+        
         async function loadAllServices(userId, filterBy = 'date_desc') {
     const tableBody = document.getElementById('allServicesTable');
     try {
@@ -735,18 +749,20 @@ function filterByYear(year) {
     }
 }
 
-function sortServices(sortBy) {
+//sortServices for load All Services
+    function sortServices(sortBy) {
     const userId = window.auth.currentUser.uid;
     loadAllServices(userId, sortBy);
 }
         
-        //Calendar Links
+//Calendar Links
+        
         function createCalendarLinks(title, date, description) {
     const eventDate = new Date(date);
     const endDate = new Date(eventDate);
     endDate.setHours(endDate.getHours() + 1);
 
-    // Google Calendar link
+// Google Calendar link
     const googleParams = {
         action: 'TEMPLATE',
         text: title,
@@ -757,7 +773,7 @@ function sortServices(sortBy) {
         .map(key => `${key}=${encodeURIComponent(googleParams[key])}`)
         .join('&')}`;
 
-    // iCal format (works with Apple Calendar, Outlook, etc.)
+// iCal format (works with Apple Calendar, Outlook, etc.)
     const iCalParams = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -774,15 +790,14 @@ END:VCALENDAR`;
     return { googleUrl, iCalUrl };
 }
         
-        // Format date for display
+// Format date for display
         function formatDate(dateString) {
             const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
             return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
-        // Load recent services
-       // Load recent services
-async function loadRecentServices(userId) {
+// Load recent services
+    async function loadRecentServices(userId) {
     const recentServicesDiv = document.getElementById('recentServices');
     try {
         console.log('Loading services for user:', userId);
@@ -835,7 +850,7 @@ async function loadRecentServices(userId) {
     }
 }
 
-        // Submit service record
+// Submit service record
         async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
@@ -877,7 +892,7 @@ async function loadRecentServices(userId) {
             );
         }
 
-        // Refresh all sections
+// Refresh all sections
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(currentUser.uid);
