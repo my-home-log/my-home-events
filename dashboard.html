@@ -509,12 +509,13 @@ window.firestore = {
         function filterByProperty(property) {
     const userId = window.auth.currentUser.uid;
 
-    // Update sections based on the selected property
+    // Call all sections with the selected property
     loadRecentServices(userId, property);
     loadUpcomingMaintenance(userId, property);
     loadYearSummary(userId, property);
     loadAllServices(userId, property);
 }
+
         
 //populatepropertyfilter
     async function populatePropertyFilter(userId) {
