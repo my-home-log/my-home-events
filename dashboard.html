@@ -503,33 +503,46 @@ window.firestore = {
             }
         };
 
+//filterByProperty
+        function filterByProperty(property) {
+    const userId = window.auth.currentUser.uid;
+
+    // Update sections based on the selected property
+    loadRecentServices(userId, property);
+    loadUpcomingMaintenance(userId, property);
+    loadYearSummary(userId, property);
+    loadAllServices(userId, property);
+}
+        
 // Loading Upcoming Maintenance function
         
-        async function loadUpcomingMaintenance(userId) {
+       async function loadUpcomingMaintenance(userId, property = 'all') {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
-        // Calculate date range
         const today = new Date();
         const sixMonthsFromNow = new Date();
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
 
-        // Convert dates to string format for Firestore comparison
-        const todayStr = today.toISOString().split('T')[0];
-        const futureStr = sixMonthsFromNow.toISOString().split('T')[0];
-
-        const q = window.firestore.query(
+        let q = window.firestore.query(
             window.firestore.collection(window.db, 'serviceRecords'),
             window.firestore.where('user_id', '==', userId),
-            window.firestore.where('follow_up_date', '>=', todayStr),
-            window.firestore.where('follow_up_date', '<=', futureStr),
+            window.firestore.where('follow_up_date', '>=', today.toISOString().split('T')[0]),
+            window.firestore.where('follow_up_date', '<=', sixMonthsFromNow.toISOString().split('T')[0]),
             window.firestore.orderBy('follow_up_date', 'asc'),
             window.firestore.limit(3)
         );
 
+        if (property !== 'all') {
+            q = window.firestore.query(
+                q,
+                window.firestore.where('property', '==', property)
+            );
+        }
+
         const querySnapshot = await window.firestore.getDocs(q);
 
         if (querySnapshot.empty) {
-            maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled.</p>';
+            maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled for this property.</p>';
             return;
         }
 
@@ -537,35 +550,12 @@ window.firestore = {
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             html += `
-    <div class="service-record">
-        <h4>${record.service_performed}</h4>
-        <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
-        <p><strong>Category:</strong> ${record.category}</p>
-        <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <a href="${createCalendarLinks(
-    record.service_performed,
-    record.follow_up_date,
-    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-).googleUrl}" 
-target="_blank" 
-class="calendar-btn"
-style="background-color: #609BE8; color: #FFF; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px; font-size: 14px;">
-    🗓️ Add to Google
-</a>
-<a href="${createCalendarLinks(
-    record.service_performed,
-    record.follow_up_date,
-    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
-).iCalUrl}" 
-download="maintenance-reminder.ics"
-class="calendar-btn"
-style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 14px;">
-    📅 Add to Other
-</a>
-        </div>
-    </div>
-`;
+<div class="service-record">
+    <h4>${record.service_performed}</h4>
+    <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
+    <p><strong>Category:</strong> ${record.category}</p>
+    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+</div>`;
         });
 
         maintenanceDiv.innerHTML = html;
@@ -574,32 +564,41 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
+
 // loadYearlySummary
         
-       async function loadYearSummary(userId) {
+       async function loadYearSummary(userId, property = 'all') {
     try {
-        const q = window.firestore.query(
+        let q = window.firestore.query(
             window.firestore.collection(window.db, 'serviceRecords'),
             window.firestore.where('user_id', '==', userId),
             window.firestore.orderBy('date_of_service', 'desc')
         );
 
+        // Add property filter if not "all"
+        if (property !== 'all') {
+            q = window.firestore.query(
+                q,
+                window.firestore.where('property', '==', property)
+            );
+        }
+
         const querySnapshot = await window.firestore.getDocs(q);
         const years = new Set();
         const yearSelect = document.getElementById('yearFilter');
-        
+
         // Store docs globally for filtering
         window.yearSummaryDocs = querySnapshot.docs;
-        
+
         querySnapshot.forEach((doc) => {
             const record = doc.data();
             const year = new Date(record.date_of_service).getFullYear();
             years.add(year);
         });
 
-// Populate year dropdown
+        // Populate year dropdown
         yearSelect.innerHTML = '<option value="all">All Years</option>';
-        Array.from(years).sort((a, b) => b - a).forEach(year => {
+        Array.from(years).sort((a, b) => b - a).forEach((year) => {
             yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
         });
 
@@ -608,6 +607,7 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         console.error('Error loading year summary:', error);
     }
 }
+
 
 // Update Year Stats        
     function updateYearStats(selectedYear, docs) {
@@ -688,74 +688,70 @@ style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius:
         
 //load allservices list
         
-        async function loadAllServices(userId, filterBy = 'date_desc') {
+async function loadAllServices(userId, property = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
-        let q;
-        
-        if (filterBy === 'date_desc') {
-            // Show all services sorted by date
+        let q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
+
+        // Add property filter if not "all"
+        if (property !== 'all') {
             q = window.firestore.query(
-                window.firestore.collection(window.db, 'serviceRecords'),
-                window.firestore.where('user_id', '==', userId),
-                window.firestore.orderBy('date_of_service', 'desc')
-            );
-        } else {
-            // Filter by category
-            q = window.firestore.query(
-                window.firestore.collection(window.db, 'serviceRecords'),
-                window.firestore.where('user_id', '==', userId),
-                window.firestore.where('category', '==', filterBy),
-                window.firestore.orderBy('date_of_service', 'desc')
+                q,
+                window.firestore.where('property', '==', property)
             );
         }
 
         const querySnapshot = await window.firestore.getDocs(q);
 
         if (querySnapshot.empty) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found for this property.</td></tr>';
             return;
         }
 
         let html = '';
         querySnapshot.forEach((doc) => {
-    const record = doc.data();
-    html += `
-        <tr style="border-bottom: 0px solid #dee2e6;">
-            <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
-            <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
-            <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
-            <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
-            <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
-            <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
-            <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-            <td style="padding: 10px; text-align: center; font-size: 0.90em;">
-    <button onclick="openEditModal('${doc.id}')" 
-            style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
-        ✏️
-    </button>
-    <button onclick="deleteRecord('${doc.id}')" 
-            style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
-        ❌
-    </button>
-</td>
-        </tr>
-        ${record.notes ? `
-        <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
-            <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                <strong>Notes:</strong> ${record.notes}
-            </td>
-        </tr>
-        ` : ''}
-    `;
-});
+            const record = doc.data();
+            html += `
+                <tr style="border-bottom: 0px solid #dee2e6;">
+                    <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
+                    <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 0.90em;">
+                        <button onclick="openEditModal('${doc.id}')" 
+                                style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
+                            ✏️
+                        </button>
+                        <button onclick="deleteRecord('${doc.id}')" 
+                                style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+                            ❌
+                        </button>
+                    </td>
+                </tr>
+                ${record.notes ? `
+                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
+                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
+                        <strong>Notes:</strong> ${record.notes}
+                    </td>
+                </tr>
+                ` : ''}
+            `;
+        });
 
         tableBody.innerHTML = html;
     } catch (error) {
         console.error('Error loading all services:', error);
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Error loading services.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Error loading services.</td></tr>';
     }
 }
+
 
 //sortServices for load All Services
     function sortServices(sortBy) {
@@ -805,25 +801,27 @@ END:VCALENDAR`;
         }
 
 // Load recent services
-    async function loadRecentServices(userId) {
+    async function loadRecentServices(userId, property = 'all') {
     const recentServicesDiv = document.getElementById('recentServices');
     try {
-        console.log('Loading services for user:', userId);
-        
-        const serviceRecordsRef = window.firestore.collection(window.db, 'serviceRecords');
-        const q = window.firestore.query(
-            serviceRecordsRef,
+        let q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
             window.firestore.where('user_id', '==', userId),
             window.firestore.orderBy('date_of_service', 'desc'),
             window.firestore.limit(3)
         );
 
-        console.log('Query created, fetching documents...');
+        if (property !== 'all') {
+            q = window.firestore.query(
+                q,
+                window.firestore.where('property', '==', property)
+            );
+        }
+
         const querySnapshot = await window.firestore.getDocs(q);
-        console.log('Documents fetched:', querySnapshot.size);
 
         if (querySnapshot.empty) {
-            recentServicesDiv.innerHTML = '<p>No service records found. Add your first service record!</p>';
+            recentServicesDiv.innerHTML = '<p>No service records found for this property.</p>';
             return;
         }
 
@@ -853,10 +851,11 @@ END:VCALENDAR`;
 
         recentServicesDiv.innerHTML = html;
     } catch (error) {
-        console.error('Detailed error loading services:', error);
-        recentServicesDiv.innerHTML = '<p>Error loading recent services. Please try refreshing the page.</p>';
+        console.error('Error loading recent services:', error);
+        recentServicesDiv.innerHTML = '<p>Error loading recent services. Please try again.</p>';
     }
 }
+
 
 // Submit service record
         async function submitServiceRecord(event) {
