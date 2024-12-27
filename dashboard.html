@@ -813,7 +813,6 @@ async function loadRecentServices(userId) {
         <div>
             <h4>${record.service_performed}</h4>
             <p class="date">${formatDate(record.date_of_service)}</p>
-            <p><strong>Category:</strong> ${record.category}</p>
             <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
             <p><strong>Cost:</strong> $${record.cost?.toFixed(2) || '0.00'}</p>
         </div>
