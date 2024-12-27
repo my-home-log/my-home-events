@@ -564,13 +564,15 @@ window.firestore = {
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
 
         let q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId),
-            window.firestore.where('follow_up_date', '>=', today.toISOString().split('T')[0]),
-            window.firestore.where('follow_up_date', '<=', sixMonthsFromNow.toISOString().split('T')[0]),
-            window.firestore.orderBy('follow_up_date', 'asc'),
-            window.firestore.limit(3)
-        );
+    window.firestore.collection(window.db, 'serviceRecords'),
+    window.firestore.where('user_id', '==', userId),
+    window.firestore.where('property', '==', property),
+    window.firestore.where('follow_up_date', '>=', todayStr),
+    window.firestore.where('follow_up_date', '<=', futureStr),
+    window.firestore.orderBy('follow_up_date', 'asc'),
+    window.firestore.limit(3)
+);
+
 
         if (property !== 'all') {
             q = window.firestore.query(
@@ -610,10 +612,12 @@ window.firestore = {
        async function loadYearSummary(userId, property = 'all') {
     try {
         let q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId),
-            window.firestore.orderBy('date_of_service', 'desc')
-        );
+    window.firestore.collection(window.db, 'serviceRecords'),
+    window.firestore.where('user_id', '==', userId),
+    window.firestore.where('property', '==', property),
+    window.firestore.orderBy('date_of_service', 'desc')
+);
+
 
         // Add property filter if not "all"
         if (property !== 'all') {
@@ -845,11 +849,13 @@ END:VCALENDAR`;
     const recentServicesDiv = document.getElementById('recentServices');
     try {
         let q = window.firestore.query(
-            window.firestore.collection(window.db, 'serviceRecords'),
-            window.firestore.where('user_id', '==', userId),
-            window.firestore.orderBy('date_of_service', 'desc'),
-            window.firestore.limit(3)
-        );
+    window.firestore.collection(window.db, 'serviceRecords'),
+    window.firestore.where('user_id', '==', userId),
+    window.firestore.where('property', '==', property),
+    window.firestore.orderBy('date_of_service', 'desc'),
+    window.firestore.limit(3)
+);
+
 
         if (property !== 'all') {
             q = window.firestore.query(
