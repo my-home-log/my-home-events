@@ -577,7 +577,11 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     }, 0);
 
     serviceCount.textContent = filteredDocs.length;
-    totalCost.textContent = `$${total.toFixed(2)}`;
+    totalCost.textContent = `$${new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+}).format(total)}`;
+
 
 
 
