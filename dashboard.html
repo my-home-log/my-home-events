@@ -464,9 +464,32 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
                     <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
                     <p><strong>Category:</strong> ${record.category}</p>
                     <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
-                </div>
-            `;
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <a href="${createCalendarLinks(
+    record.service_performed,
+    record.follow_up_date,
+    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+).googleUrl}" 
+target="_blank" 
+class="calendar-btn"
+style="background-color: #609BE8; color: #FFF; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 10px; font-size: 14px;">
+    🗓️ Add to Google
+</a>
+<a href="${createCalendarLinks(
+    record.service_performed,
+    record.follow_up_date,
+    `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+).iCalUrl}" 
+download="maintenance-reminder.ics"
+class="calendar-btn"
+style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 14px;">
+    📅 Add to Other
+</a>
+        </div>
+    </div>
+`;
         });
+
 
         maintenanceDiv.innerHTML = html;
     } catch (error) {
