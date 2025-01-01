@@ -155,3 +155,12 @@
     #toggleYearSummary:hover {
     background-color: #BCCFE8;
 }
+
+#upcomingMaintenance {
+    max-height: 300px; /* Set the height limit */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    padding: 10px;     /* Optional: Add padding for aesthetics */
+    border: 1px solid #ddd; /* Optional: Add a border for consistency */
+    border-radius: 4px; /* Optional: Match the rounded corners style */
+    background-color: #f8f9fa; /* Optional: Match the background style */
+}
