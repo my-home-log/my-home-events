@@ -155,3 +155,41 @@
     #toggleYearSummary:hover {
     background-color: #BCCFE8;
 }
+/* Calendar Button Styles */
+.calendar-btn {
+    display: inline-flex; /* Align icon and text horizontally */
+    align-items: center; /* Center-align icon and text vertically */
+    gap: 8px; /* Add space between the icon and text */
+    text-decoration: none; /* Remove underline */
+    padding: 8px 12px; /* Add padding for a button-like look */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 14px; /* Set font size for text */
+    cursor: pointer; /* Pointer cursor for interactivity */
+}
+
+/* Google Calendar Button */
+.calendar-btn.google {
+    background-color: #609BE8; /* Blue for Google */
+    color: white; /* White text */
+}
+
+.calendar-btn.google:hover {
+    background-color: #1557b0; /* Darker blue on hover */
+}
+
+/* iCal Calendar Button */
+.calendar-btn.ical {
+    background-color: #A0B4BD; /* Gray for iCal */
+    color: black; /* Black text */
+}
+
+.calendar-btn.ical:hover {
+    background-color: #7D8A91; /* Darker gray on hover */
+}
+
+/* Calendar Icon */
+.calendar-icon {
+    width: 16px; /* Set icon width */
+    height: 16px; /* Set icon height */
+    vertical-align: middle; /* Align the icon with the text */
+}
