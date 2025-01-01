@@ -461,9 +461,10 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             html += `
                 <div class="service-record">
                     <h4>${record.service_performed}</h4>
+                    <p class="date">${formatDate(record.date_of_service)}</p>
                     <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
-                    <p><strong>Category:</strong> ${record.category}</p>
                     <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+                    <p><strong>Vendor Phone:</strong> ${record.vendor_phone || 'Not provided'}</p>
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
 
             
