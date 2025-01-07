@@ -62,9 +62,9 @@ jobs:
                     text: `
                       Upcoming maintenance reminder:
                       Service: ${maintenance.service}
-                      Due Date: ${maintenance.followupDate.toDate().toLocaleDateString()}
-                      Vendor: ${maintenance.vendor}
-                      Phone: ${maintenance.vendorPhone}
+                      Due Date: ${maintenance.follow_up_date.toDate().toLocaleDateString()}
+                      Vendor: ${maintenance.vendor_name}
+                      Phone: ${maintenance.vendor_phone}
                       
                       This is your ${interval.label} reminder.
                     `
