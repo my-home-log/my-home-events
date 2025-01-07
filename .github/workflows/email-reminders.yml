@@ -48,7 +48,7 @@ jobs:
                 const targetDate = new Date(now.getTime() + (interval.days * 24 * 60 * 60 * 1000));
                 
                 const snapshot = await db.collection('maintenance')
-                  .where('followupDate', '<=', targetDate)
+                  .where('follow_up_date', '<=', targetDate)
                   .where(`${interval.days}DayReminderSent`, '==', false)
                   .get();
 
