@@ -56,7 +56,7 @@ jobs:
                   const maintenance = doc.data();
                   
                   const msg = {
-                    to: maintenance.userEmail,
+                    to: maintenance.user_id,
                     from: 'myhomeeventssystem@gmail.com',
                     subject: `Maintenance Reminder: ${maintenance.service} - ${interval.label} notice`,
                     text: `
