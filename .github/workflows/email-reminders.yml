@@ -1,0 +1,95 @@
+name: Maintenance Email Reminders
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Runs daily at 12:00 PM UTC
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  check-maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Create Reminder Script
+        run: |
+          cat > check-maintenance.js << 'EOL'
+          const admin = require('firebase-admin');
+          const nodemailer = require('nodemailer');
+
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+          });
+
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'myhomeeventssystem@gmail.com',
+              pass: process.env.GMAIL_APP_PASSWORD
+            }
+          });
+
+          async function checkMaintenance() {
+            const db = admin.firestore();
+            const now = new Date();
+            
+            const intervals = [
+              { days: 180, label: '6 months' },
+              { days: 90, label: '90 days' },
+              { days: 7, label: '1 week' }
+            ];
+
+            try {
+              for (const interval of intervals) {
+                const targetDate = new Date(now.getTime() + (interval.days * 24 * 60 * 60 * 1000));
+                
+                const snapshot = await db.collection('maintenance')
+                  .where('followupDate', '<=', targetDate)
+                  .where(`${interval.days}DayReminderSent`, '==', false)
+                  .get();
+
+                for (const doc of snapshot.docs) {
+                  const maintenance = doc.data();
+                  
+                  const msg = {
+                    to: maintenance.userEmail,
+                    from: 'myhomeeventssystem@gmail.com',
+                    subject: `Maintenance Reminder: ${maintenance.service} - ${interval.label} notice`,
+                    text: `
+                      Upcoming maintenance reminder:
+                      Service: ${maintenance.service}
+                      Due Date: ${maintenance.followupDate.toDate().toLocaleDateString()}
+                      Vendor: ${maintenance.vendor}
+                      Phone: ${maintenance.vendorPhone}
+                      
+                      This is your ${interval.label} reminder.
+                    `
+                  };
+
+                  await transporter.sendMail(msg);
+                  await doc.ref.update({ [`${interval.days}DayReminderSent`]: true });
+                }
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              process.exit(1);
+            }
+
+            process.exit(0);
+          }
+
+          checkMaintenance();
+          EOL
+
+      - name: Install Dependencies
+        run: npm install firebase-admin nodemailer
+
+      - name: Run Reminder Script
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node check-maintenance.js
