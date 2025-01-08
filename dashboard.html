@@ -267,7 +267,7 @@ window.firestore = {
         auth.onAuthStateChanged(async (user) => {
     if (user) {
         document.getElementById('userName').textContent = user.displayName || user.email;
-        await populatePropertyFilter(userId); // Call to populate dropdown
+        await populatePropertyFilter(user.uid); // Call to populate dropdown
         await loadRecentServices(user.uid);
         await loadUpcomingMaintenance(user.uid);
         await loadYearSummary(user.uid); // Add this line
@@ -353,7 +353,7 @@ window.firestore = {
         const userId = window.auth.currentUser.uid;
         
 // Refresh all sections
-        await populatePropertyFilter(userId); // Call to populate dropdown
+        await populatePropertyFilter(user.uid); // Call to populate dropdown
         await loadRecentServices(userId);
         await loadUpcomingMaintenance(userId);
         await loadYearSummary(userId);
