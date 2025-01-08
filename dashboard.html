@@ -311,6 +311,52 @@ window.firestore = {
     submitButton.removeAttribute('data-doc-id');
 }
 
+// Submit service record
+        async function submitServiceRecord(event) {
+    event.preventDefault();
+    const currentUser = window.auth.currentUser;
+    
+    if (!currentUser) {
+        alert('Please log in to save records');
+        return;
+    }
+
+    try {
+        const submitButton = document.querySelector('.modal-content .add-service-btn');
+        const docId = submitButton.getAttribute('data-doc-id');
+        
+        const record = {
+            date_of_service: document.getElementById('serviceDate').value,
+            property: document.getElementById('property').value || 'Main Property', // Add this
+            category: document.getElementById('serviceCategory').value,
+            service_performed: document.getElementById('servicePerformed').value,
+            notes: document.getElementById('serviceNotes').value,
+            vendor_name: document.getElementById('vendorName').value,
+            vendor_phone: document.getElementById('vendorPhone').value,
+            cost: parseFloat(document.getElementById('cost').value) || 0,
+            follow_up_date: document.getElementById('followUpDate').value,
+            reminder_180days_sent: false,
+            reminder_90days_sent: false,
+            reminder_7days_sent: false
+            user_id: currentUser.uid
+        };
+
+        if (docId) {
+            // Update existing record
+            await window.firestore.updateDoc(
+                window.firestore.doc(window.db, 'serviceRecords', docId),
+                record
+            );
+        } else {
+            // Add new record
+            record.created_at = new Date().toISOString();
+            await window.firestore.addDoc(
+                window.firestore.collection(window.db, 'serviceRecords'),
+                record
+            );
+        }
+        
+        
 // Edit Record
         
       async function openEditModal(docId) {
@@ -327,7 +373,11 @@ window.firestore = {
     document.getElementById('vendorPhone').value = record.vendor_phone || '';
     document.getElementById('cost').value = record.cost || '';
     document.getElementById('followUpDate').value = record.follow_up_date || '';
-
+    if (typeof record.reminder_180days_sent === 'undefined') {
+    record.reminder_180days_sent = false;
+    record.reminder_90days_sent = false;
+    record.reminder_7days_sent = false;
+}
     // Change modal title and submit button
     document.querySelector('.modal-content h2').textContent = 'Edit Service Record';
     const submitButton = document.querySelector('.modal-content .add-service-btn');
@@ -854,47 +904,7 @@ END:VCALENDAR`;
 
 
 
-// Submit service record
-        async function submitServiceRecord(event) {
-    event.preventDefault();
-    const currentUser = window.auth.currentUser;
-    
-    if (!currentUser) {
-        alert('Please log in to save records');
-        return;
-    }
 
-    try {
-        const submitButton = document.querySelector('.modal-content .add-service-btn');
-        const docId = submitButton.getAttribute('data-doc-id');
-        
-        const record = {
-            date_of_service: document.getElementById('serviceDate').value,
-            property: document.getElementById('property').value || 'Main Property', // Add this
-            category: document.getElementById('serviceCategory').value,
-            service_performed: document.getElementById('servicePerformed').value,
-            notes: document.getElementById('serviceNotes').value,
-            vendor_name: document.getElementById('vendorName').value,
-            vendor_phone: document.getElementById('vendorPhone').value,
-            cost: parseFloat(document.getElementById('cost').value) || 0,
-            follow_up_date: document.getElementById('followUpDate').value,
-            user_id: currentUser.uid
-        };
-
-        if (docId) {
-            // Update existing record
-            await window.firestore.updateDoc(
-                window.firestore.doc(window.db, 'serviceRecords', docId),
-                record
-            );
-        } else {
-            // Add new record
-            record.created_at = new Date().toISOString();
-            await window.firestore.addDoc(
-                window.firestore.collection(window.db, 'serviceRecords'),
-                record
-            );
-        }
 
 // Refresh all sections
     
