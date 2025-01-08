@@ -335,9 +335,9 @@ window.firestore = {
             vendor_phone: document.getElementById('vendorPhone').value,
             cost: parseFloat(document.getElementById('cost').value) || 0,
             follow_up_date: document.getElementById('followUpDate').value,
-            reminder_180days_sent: false,
-            reminder_90days_sent: false,
-            reminder_7days_sent: false,
+            //reminder_180days_sent: false,
+            //reminder_90days_sent: false,
+            //reminder_7days_sent: false,
             user_id: currentUser.uid
         };
 
@@ -373,10 +373,10 @@ window.firestore = {
     document.getElementById('vendorPhone').value = record.vendor_phone || '';
     document.getElementById('cost').value = record.cost || '';
     document.getElementById('followUpDate').value = record.follow_up_date || '';
-    if (typeof record.reminder_180days_sent === 'undefined') {
-    record.reminder_180days_sent = false;
-    record.reminder_90days_sent = false;
-    record.reminder_7days_sent = false;
+    // if (typeof record.reminder_180days_sent === 'undefined') {
+    // record.reminder_180days_sent = false;
+   // record.reminder_90days_sent = false;
+    //record.reminder_7days_sent = false;
 }
     // Change modal title and submit button
     document.querySelector('.modal-content h2').textContent = 'Edit Service Record';
