@@ -353,7 +353,7 @@ window.firestore = {
         const userId = window.auth.currentUser.uid;
         
 // Refresh all sections
-        await populatePropertyFilter(user.uid); // Call to populate dropdown
+        await populatePropertyFilter(userId); // Call to populate dropdown
         await loadRecentServices(userId);
         await loadUpcomingMaintenance(userId);
         await loadYearSummary(userId);
