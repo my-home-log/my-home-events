@@ -3,7 +3,7 @@ name: Maintenance Email Reminders
 on:
   schedule:
     - cron: '0 12 * * *'  # Runs daily at 12:00 PM UTC
-  workflow_dispatch:      # Allows manual trigger
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   check-maintenance:
@@ -48,23 +48,29 @@ jobs:
                 const targetDate = new Date(now.getTime() + (interval.days * 24 * 60 * 60 * 1000));
                 
                 const snapshot = await db.collection('maintenance')
+                  .where('follow_up_date', '>=', now)
                   .where('follow_up_date', '<=', targetDate)
                   .where(`${interval.days}DayReminderSent`, '==', false)
+                  .orderBy('follow_up_date')
                   .get();
 
                 for (const doc of snapshot.docs) {
                   const maintenance = doc.data();
-                  
+                  if (!maintenance.follow_up_date) {
+                    console.log(`Skipping record ${doc.id} as follow-up date is missing.`);
+                    continue;
+                  }
+
                   const msg = {
                     to: maintenance.user_id,
                     from: 'myhomeeventssystem@gmail.com',
-                    subject: `Maintenance Reminder: ${maintenance.service} - ${interval.label} notice`,
+                    subject: `Maintenance Reminder: ${maintenance.service_performed} - ${interval.label} notice`,
                     text: `
                       Upcoming maintenance reminder:
-                      Service: ${maintenance.service}
-                      Due Date: ${maintenance.follow_up_date.toDate().toLocaleDateString()}
-                      Vendor: ${maintenance.vendor_name}
-                      Phone: ${maintenance.vendor_phone}
+                      Service: ${maintenance.service_performed}
+                      Due Date: ${new Date(maintenance.follow_up_date).toLocaleDateString()}
+                      Vendor: ${maintenance.vendor_name || 'Not specified'}
+                      Phone: ${maintenance.vendor_phone || 'Not provided'}
                       
                       This is your ${interval.label} reminder.
                     `
