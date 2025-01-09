@@ -39,7 +39,7 @@ jobs:
 
             try {
               // Fetch all documents in the 'maintenance' collection
-              const snapshot = await db.collection('maintenance').get();
+              const snapshot = await db.collection('serviceRecords').get();
               console.log(`Found ${snapshot.size} documents.`);
 
               for (const doc of snapshot.docs) {
