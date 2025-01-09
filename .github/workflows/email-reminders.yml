@@ -15,92 +15,91 @@ jobs:
           node-version: '16'
 
       - name: Create Reminder Script
-    run: |
-      cat > check-maintenance.js << 'EOL'
-      const admin = require('firebase-admin');
-      const nodemailer = require('nodemailer');
+        run: |
+          cat > check-maintenance.js << 'EOL'
+          const admin = require('firebase-admin');
+          const nodemailer = require('nodemailer');
 
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-      });
+          const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+          });
 
-      const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'myhomeeventssystem@gmail.com',
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
-      });
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'myhomeeventssystem@gmail.com',
+              pass: process.env.GMAIL_APP_PASSWORD
+            }
+          });
 
-      async function checkMaintenance() {
-      const db = admin.firestore();
-      const now = new Date();
-      const sixMonthsAhead = new Date();
-      sixMonthsAhead.setMonth(now.getMonth() + 6);  // Add 6 months to today's date
+          async function checkMaintenance() {
+            const db = admin.firestore();
+            const now = new Date();
+            const sixMonthsAhead = new Date();
+            sixMonthsAhead.setMonth(now.getMonth() + 6);  // Add 6 months to today's date
 
-      try {
-        const snapshot = await db.collection('maintenance')
-          .where('follow_up_date', '>=', now)
-          .where('follow_up_date', '<=', sixMonthsAhead)
-          .get();  // Get documents where follow_up_date is within 6 months
+            try {
+              const snapshot = await db.collection('maintenance')
+                .where('follow_up_date', '>=', now)
+                .where('follow_up_date', '<=', sixMonthsAhead)
+                .get();  // Get documents where follow_up_date is within 6 months
 
-        for (const doc of snapshot.docs) {
-          const maintenance = doc.data();
+              for (const doc of snapshot.docs) {
+                const maintenance = doc.data();
 
-          // Add missing fields with default values
-          const updates = {};
-          if (maintenance['180DayReminderSent'] === undefined) {
-            updates['180DayReminderSent'] = false;
+                // Add missing fields with default values
+                const updates = {};
+                if (maintenance['180DayReminderSent'] === undefined) {
+                  updates['180DayReminderSent'] = false;
+                }
+                if (maintenance['90DayReminderSent'] === undefined) {
+                  updates['90DayReminderSent'] = false;
+                }
+                if (maintenance['7DayReminderSent'] === undefined) {
+                  updates['7DayReminderSent'] = false;
+                }
+
+                // Update the document if new fields were added
+                if (Object.keys(updates).length > 0) {
+                  await doc.ref.update(updates);
+                  console.log(`Added missing reminder fields for document ${doc.id}`);
+                }
+
+                // Send 6-month reminder email if needed
+                if (!maintenance.follow_up_date) {
+                  console.log(`Skipping record ${doc.id} as follow-up date is missing.`);
+                  continue;
+                }
+
+                const msg = {
+                  to: maintenance.user_id,
+                  from: 'myhomeeventssystem@gmail.com',
+                  subject: `Maintenance Reminder: ${maintenance.service_performed} - 6-month notice`,
+                  text: `
+                    Upcoming maintenance reminder:
+                    Service: ${maintenance.service_performed}
+                    Due Date: ${new Date(maintenance.follow_up_date).toLocaleDateString()}
+                    Vendor: ${maintenance.vendor_name || 'Not specified'}
+                    Phone: ${maintenance.vendor_phone || 'Not provided'}
+                    
+                    This is your 6-month reminder.
+                  `
+                };
+
+                await transporter.sendMail(msg);
+                console.log(`Email sent for ${maintenance.service_performed} to ${maintenance.user_id}`);
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              process.exit(1);
+            }
+
+            process.exit(0);
           }
-          if (maintenance['90DayReminderSent'] === undefined) {
-            updates['90DayReminderSent'] = false;
-          }
-          if (maintenance['7DayReminderSent'] === undefined) {
-            updates['7DayReminderSent'] = false;
-          }
 
-          // Update the document if new fields were added
-          if (Object.keys(updates).length > 0) {
-            await doc.ref.update(updates);
-            console.log(`Added missing reminder fields for document ${doc.id}`);
-          }
-
-          // Send 6-month reminder email if needed
-          if (!maintenance.follow_up_date) {
-            console.log(`Skipping record ${doc.id} as follow-up date is missing.`);
-            continue;
-          }
-
-          const msg = {
-            to: maintenance.user_id,
-            from: 'myhomeeventssystem@gmail.com',
-            subject: `Maintenance Reminder: ${maintenance.service_performed} - 6-month notice`,
-            text: `
-              Upcoming maintenance reminder:
-              Service: ${maintenance.service_performed}
-              Due Date: ${new Date(maintenance.follow_up_date).toLocaleDateString()}
-              Vendor: ${maintenance.vendor_name || 'Not specified'}
-              Phone: ${maintenance.vendor_phone || 'Not provided'}
-              
-              This is your 6-month reminder.
-            `
-          };
-
-          await transporter.sendMail(msg);
-          console.log(`Email sent for ${maintenance.service_performed} to ${maintenance.user_id}`);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        process.exit(1);
-      }
-
-      process.exit(0);
-    }
-
-    checkMaintenance();
-    EOL
-
+          checkMaintenance();
+          EOL
 
       - name: Install Dependencies
         run: npm install firebase-admin nodemailer
