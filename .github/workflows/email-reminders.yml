@@ -35,60 +35,50 @@ jobs:
 
           async function checkMaintenance() {
             const db = admin.firestore();
-            const now = new Date();
-            const sixMonthsAhead = new Date();
-            sixMonthsAhead.setMonth(now.getMonth() + 6);  // Add 6 months to today's date
+            const now = new Date();  // Today's date
 
             try {
-              const snapshot = await db.collection('maintenance')
-                .where('follow_up_date', '>=', now)
-                .where('follow_up_date', '<=', sixMonthsAhead)
-                .get();  // Get documents where follow_up_date is within 6 months
-          console.log(`Found ${snapshot.size} documents.`);
-            for (const doc of snapshot.docs) {
-                const maintenance = doc.data();
-          console.log(`Checking document ${doc.id} with follow-up date ${maintenance.follow_up_date}`);
-                // Add missing fields with default values
-                const updates = {};
-                if (maintenance['180DayReminderSent'] === undefined) {
-                  updates['180DayReminderSent'] = false;
-                }
-                if (maintenance['90DayReminderSent'] === undefined) {
-                  updates['90DayReminderSent'] = false;
-                }
-                if (maintenance['7DayReminderSent'] === undefined) {
-                  updates['7DayReminderSent'] = false;
-                }
-           console.log(`Updates for document ${doc.id}:`, updates);
-                // Update the document if new fields were added
-                if (Object.keys(updates).length > 0) {
-                  await doc.ref.update(updates);
-                  console.log(`Added missing reminder fields for document ${doc.id}`);
-                }
+              // Fetch all documents in the 'maintenance' collection
+              const snapshot = await db.collection('maintenance').get();
+              console.log(`Found ${snapshot.size} documents.`);
 
-                // Send 6-month reminder email if needed
+              for (const doc of snapshot.docs) {
+                const maintenance = doc.data();
+
                 if (!maintenance.follow_up_date) {
                   console.log(`Skipping record ${doc.id} as follow-up date is missing.`);
-                  continue;
+                  continue;  // Skip documents without follow-up dates
                 }
 
-                const msg = {
-                  to: maintenance.user_id,
-                  from: 'myhomeeventssystem@gmail.com',
-                  subject: `Maintenance Reminder: ${maintenance.service_performed} - 6-month notice`,
-                  text: `
-                    Upcoming maintenance reminder:
-                    Service: ${maintenance.service_performed}
-                    Due Date: ${new Date(maintenance.follow_up_date).toLocaleDateString()}
-                    Vendor: ${maintenance.vendor_name || 'Not specified'}
-                    Phone: ${maintenance.vendor_phone || 'Not provided'}
-                    
-                    This is your 6-month reminder.
-                  `
-                };
+                // Calculate the reminder date (follow-up date minus 60 days)
+                const followUpDate = new Date(maintenance.follow_up_date);
+                const reminderDate = new Date(followUpDate);
+                reminderDate.setDate(reminderDate.getDate() - 60);  // Subtract 60 days
 
-                await transporter.sendMail(msg);
-                console.log(`Email sent for ${maintenance.service_performed} to ${maintenance.user_id}`);
+                if (now >= reminderDate) {
+                  // Send email reminder
+                  const msg = {
+                    to: maintenance.user_id,
+                    from: 'myhomeeventssystem@gmail.com',
+                    subject: `Maintenance Reminder: ${maintenance.service_performed} - 60 days notice`,
+                    text: `
+                      Hi there,
+
+                      This is a reminder that the following maintenance task is coming up soon:
+                      - **Service:** ${maintenance.service_performed}
+                      - **Due Date:** ${followUpDate.toLocaleDateString()}
+                      - **Vendor:** ${maintenance.vendor_name || 'Not specified'}
+                      - **Phone:** ${maintenance.vendor_phone || 'Not provided'}
+
+                      Please make sure to schedule or prepare accordingly.
+                    `
+                  };
+
+                  await transporter.sendMail(msg);
+                  console.log(`Email sent for ${maintenance.service_performed} to ${maintenance.user_id}`);
+                } else {
+                  console.log(`No reminder needed for document ${doc.id}.`);
+                }
               }
             } catch (error) {
               console.error('Error:', error);
