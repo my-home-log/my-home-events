@@ -44,10 +44,10 @@ jobs:
                 .where('follow_up_date', '>=', now)
                 .where('follow_up_date', '<=', sixMonthsAhead)
                 .get();  // Get documents where follow_up_date is within 6 months
-
-              for (const doc of snapshot.docs) {
+          console.log(`Found ${snapshot.size} documents.`);
+            for (const doc of snapshot.docs) {
                 const maintenance = doc.data();
-
+          console.log(`Checking document ${doc.id} with follow-up date ${maintenance.follow_up_date}`);
                 // Add missing fields with default values
                 const updates = {};
                 if (maintenance['180DayReminderSent'] === undefined) {
@@ -59,7 +59,7 @@ jobs:
                 if (maintenance['7DayReminderSent'] === undefined) {
                   updates['7DayReminderSent'] = false;
                 }
-
+           console.log(`Updates for document ${doc.id}:`, updates);
                 // Update the document if new fields were added
                 if (Object.keys(updates).length > 0) {
                   await doc.ref.update(updates);
