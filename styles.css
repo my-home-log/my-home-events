@@ -160,6 +160,7 @@
     max-height: 300px; /* Set the height limit */
     overflow-y: auto;  /* Enable vertical scrolling */
     padding: 0;     /* Optional: Add padding for aesthetics */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
     border: none; /* Optional: Add a border for consistency */
     border-radius: 0; /* Optional: Match the rounded corners style */
     background-color: #f8f9fa; /* Optional: Match the background style */
