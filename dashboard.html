@@ -429,6 +429,13 @@ window.firestore = {
 async function loadUpcomingMaintenance(userId, property = 'all') {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
+        const user = await new Promise((resolve) => {
+            window.firebase.auth().onAuthStateChanged(resolve);
+        });
+        
+        if (!user) {
+            throw new Error('User not authenticated');
+        }
         const today = new Date();
         const sixMonthsFromNow = new Date();
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
