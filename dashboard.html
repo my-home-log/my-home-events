@@ -6,6 +6,7 @@
     <title>My Home Events - Dashboard</title>
 <?Link to Css>
     <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -291,7 +292,7 @@ window.firestore = {
 
 <!-- Application Functions -->
     <script>
-        
+ emailjs.init('1r8AlMuY3PpUaYgjn');       
 // Modal control functions
         
         function openModal() {
