@@ -801,10 +801,17 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
 
 
 //sortServices for load All Services sortBy
-    function sortServices(category) {
+    //function sortServices(category) {
+    //const userId = window.auth.currentUser.uid;
+    //loadAllServices(userId, category);
+//}
+
+        function sortServices(category) {
     const userId = window.auth.currentUser.uid;
-    loadAllServices(userId, category);
+    const selectedProperty = document.getElementById('propertyFilter').value;  // Get the currently selected property
+    loadAllServices(userId, selectedProperty, category);  // Pass both property and category
 }
+
         
 //Calendar Links
         
