@@ -480,7 +480,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
                         reply_to: userEmail,
                         to_email: userEmail
                     });
-
+          console.log('Email notification sent for:', record.service_performed);
 // Update the document to mark notification as sent
                     await window.firestore.updateDoc(doc.ref, {
                         notification_sent: true
