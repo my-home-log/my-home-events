@@ -529,6 +529,7 @@ async function checkAndSendReminders(records) {
 async function sendReminderEmail(record) {
     const templateParams = {
         userName: record.user_name || 'User',
+        to_email: window.auth.currentUser.email,
         service_performed: decodeURIComponent(record.service_performed),
         follow_up_date: formatDate(record.follow_up_date),
         vendor_name: record.vendor_name || 'Not specified',
