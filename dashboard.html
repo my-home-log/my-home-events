@@ -727,7 +727,7 @@ async function testEmailReminder() {
         
 //load allservices list
         
-async function loadAllServices(userId, year = 'all') {
+async function loadAllServices(userId, category = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
         let q = window.firestore.query(
@@ -737,13 +737,13 @@ async function loadAllServices(userId, year = 'all') {
         );
 
         // Filter by year if not "all"
-        if (year !== 'all') {
-            const startOfYear = new Date(`${year}-01-01`).toISOString();
-            const endOfYear = new Date(`${year}-12-31`).toISOString();
-            q = window.firestore.query(
-                q,
-                window.firestore.where('date_of_service', '>=', startOfYear),
-                window.firestore.where('date_of_service', '<=', endOfYear)
+        //if (year !== 'all') {
+            //const startOfYear = new Date(`${year}-01-01`).toISOString();
+            //const endOfYear = new Date(`${year}-12-31`).toISOString();
+            //q = window.firestore.query(
+                //q,
+                //window.firestore.where('date_of_service', '>=', startOfYear),
+                //window.firestore.where('date_of_service', '<=', endOfYear)
             );
         }
 
