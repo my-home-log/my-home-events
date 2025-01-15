@@ -22,7 +22,7 @@
             <div class="dashboard-card">
                 <h3>Quick Actions</h3>
                 <button class="add-service-btn" onclick="openModal()">Add New Service Record</button>
-               
+               <button onclick="testEmailReminder()" class="add-service-btn" style="margin-top: 10px;">Test Email Reminder</button>
                <label for="propertyFilter" style="display: block; margin-top: 40px; font-weight: normal; font-size: 14px;">Select Property:</label>
                <select id="propertyFilter" onchange="filterByProperty(this.value)" 
                 style="margin-top: 10px; width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
@@ -526,7 +526,21 @@ async function sendReminderEmail(record) {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-     
+
+// Add this test function
+async function testEmailReminder() {
+    const testRecord = {
+        user_name: 'Test User',
+        service_performed: 'Test Service',
+        follow_up_date: new Date().toISOString(),
+        vendor_name: 'Test Vendor',
+        vendor_phone: '555-0123',
+        notes: 'Test reminder email'
+    };
+
+    await sendReminderEmail(testRecord);
+}
+        
 // loadYearlySummary
         
       async function loadYearSummary(userId, property = 'all') {
