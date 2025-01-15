@@ -527,17 +527,17 @@ async function checkAndSendReminders(records) {
 }
         
 async function sendReminderEmail(record) {
-    const templateParams = {
-        userName: auth.currentUser.displayName || auth.currentUser.email,
-        to_email: auth.currentUser.email,
-        service_performed: decodeURIComponent(record.service_performed),
-        property: record.property || 'Main Property',
-        date_of_service: formatDate(record.date_of_service)
-        follow_up_date: formatDate(record.follow_up_date),
-        vendor_name: record.vendor_name || 'Not specified',
-        vendor_phone: record.vendor_phone || 'Not provided',
-        notes: record.notes || 'No additional notes',
-    };
+   const templateParams = {
+    user: auth.currentUser.displayName || auth.currentUser.email,  // Change from userName
+    to_email: auth.currentUser.email,
+    service_performed: record.service_performed,
+    follow_up_date: formatDate(record.follow_up_date),
+    property: record.property || 'Main Property',
+    date_of_service: formatDate(record.date_of_service),
+    vendor_name: record.vendor_name || 'Not specified',
+    vendor_phone: record.vendor_phone || 'Not provided',
+    notes: record.notes || 'No additional notes'
+};
 
     try {
         await emailjs.send(
