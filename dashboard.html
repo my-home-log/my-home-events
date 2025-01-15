@@ -524,7 +524,7 @@ async function checkAndSendReminders(records) {
 async function sendReminderEmail(record) {
     const templateParams = {
         userName: record.user_name || 'User',
-        service_performed: record.service_performed,
+        service_performed: decodeURIComponent(record.service_performed),
         follow_up_date: formatDate(record.follow_up_date),
         vendor_name: record.vendor_name || 'Not specified',
         vendor_phone: record.vendor_phone || 'Not provided',
