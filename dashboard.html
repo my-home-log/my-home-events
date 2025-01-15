@@ -495,6 +495,12 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     </div>
 `;
         });
+        maintenanceDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading upcoming maintenance:', error);
+        maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
+    }
+}
 
 async function sendReminderEmail(record) {
     const templateParams = {
@@ -519,14 +525,7 @@ async function sendReminderEmail(record) {
         console.error('Failed to send reminder:', error);
     }
 }
-
-        maintenanceDiv.innerHTML = html;
-    } catch (error) {
-        console.error('Error loading upcoming maintenance:', error);
-        maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
-    }
-}
-
+        
 // Add this test function
 async function testEmailReminder() {
     const testRecord = {
