@@ -442,7 +442,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             window.firestore.orderBy('follow_up_date', 'asc')
         );
 
-        // Add property filter only if not "all"
+// Add property filter only if not "all"
         if (property !== 'all') {
             q = window.firestore.query(
                 q,
@@ -452,6 +452,12 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
         const querySnapshot = await window.firestore.getDocs(q);
 
+// Get user email from Firestore
+        const userDoc = await window.firestore.getDoc(
+            window.firestore.doc(window.db, 'users', userId)
+        );
+        const userEmail = userDoc.data().email;
+        
         if (querySnapshot.empty) {
             maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled.</p>';
             return;
@@ -460,6 +466,30 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
+       
+// Send email notification if not already sent
+            if (!record.notification_sent) {
+                try {
+                    await emailjs.send("service_3qcs1us", "template_default", {
+                        userName: userDoc.data().name || "User",
+                        service_performed: record.service_performed,
+                        follow_up_date: formatDate(record.follow_up_date),
+                        vendor_name: record.vendor_name || "Not specified",
+                        vendor_phone: record.vendor_phone || "Not provided",
+                        notes: record.notes || "",
+                        reply_to: userEmail,
+                        to_email: userEmail
+                    });
+
+// Update the document to mark notification as sent
+                    await window.firestore.updateDoc(doc.ref, {
+                        notification_sent: true
+                    });
+                } catch (error) {
+                    console.error('Error sending email:', error);
+                }
+            }
+            
             html += `
                 <div class="service-record">
                     <h4>${record.service_performed}</h4>
