@@ -496,6 +496,29 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 `;
         });
 
+async function sendReminderEmail(record) {
+    const templateParams = {
+        userName: record.user_name || 'User',
+        service_performed: record.service_performed,
+        follow_up_date: formatDate(record.follow_up_date),
+        vendor_name: record.vendor_name || 'Not specified',
+        vendor_phone: record.vendor_phone || 'Not provided',
+        notes: record.notes || 'No additional notes',
+        reply_to: 'myhomeservicessystem@gmail.com'
+    };
+
+    try {
+        await emailjs.send(
+            'service_3qcs1us',  // Your EmailJS service ID
+            'template_3dpcmaf',      // Replace with your template ID
+            templateParams,
+            'your_public_key'   // Replace with your public key
+        );
+        console.log('Reminder email sent successfully');
+    } catch (error) {
+        console.error('Failed to send reminder:', error);
+    }
+}
 
         maintenanceDiv.innerHTML = html;
     } catch (error) {
@@ -503,8 +526,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
     }
 }
-
-
+     
 // loadYearlySummary
         
       async function loadYearSummary(userId, property = 'all') {
