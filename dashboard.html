@@ -537,9 +537,16 @@ async function checkAndSendReminders(records) {
         }
     }
 }
-        
+
+//Send Reminder Emails        
 async function sendReminderEmail(record) {
-   const templateParams = {
+   const calendarLinks = createCalendarLinks(
+        record.service_performed,
+        record.follow_up_date,
+        `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+    );
+    
+    const templateParams = {
     user: auth.currentUser.displayName || auth.currentUser.email,  // Change from userName
     to_email: auth.currentUser.email,
     service_performed: record.service_performed,
