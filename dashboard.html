@@ -19,7 +19,7 @@
         </div>
 
         <div class="dashboard-content">
-            <div class="dashboard-card" style="border: 1px solid #4A90E2; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); border-radius: 8px; background-color: #f7f9fc;">
+            <div class="dashboard-card">
                 <h3>Quick Actions</h3>
                 <button class="add-service-btn" onclick="openModal()">Add New Service Record</button>
                
@@ -33,13 +33,13 @@
 
             <div class="dashboard-card">
                 <h3>Recent Services</h3>
-                <div id="recentServices" style="max-height: 300px; overflow-y: auto;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);">
+                <div id="recentServices" style="max-height: 300px; overflow-y: auto;">
                     <p>Loading recent services...</p>
                 </div>
             </div>
             <div class="dashboard-card">
                 <h3>Upcoming Maintenance - 6 Months</h3>
-                <div id="upcomingMaintenance" style="max-height: 300px; overflow-y: auto;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);">
+                <div id="upcomingMaintenance">
                     <p>Your scheduled maintenance tasks will appear here.</p>
                 </div>
             </div>
@@ -226,8 +226,6 @@ import {
     getDocs,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import * as EmailJS from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-emailjs.init("service_3qcs1us");
         
 // Firebase Configuration
         const firebaseConfig = {
@@ -426,8 +424,6 @@ window.firestore = {
         
 // Loading Upcoming Maintenance function
         
-// Loading Upcoming Maintenance function
-        
 async function loadUpcomingMaintenance(userId, property = 'all') {
     const maintenanceDiv = document.getElementById('upcomingMaintenance');
     try {
@@ -444,7 +440,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             window.firestore.orderBy('follow_up_date', 'asc')
         );
 
-// Add property filter only if not "all"
+        // Add property filter only if not "all"
         if (property !== 'all') {
             q = window.firestore.query(
                 q,
@@ -454,12 +450,6 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
         const querySnapshot = await window.firestore.getDocs(q);
 
-// Get user email from Firestore
-        const userDoc = await window.firestore.getDoc(
-            window.firestore.doc(window.db, 'users', userId)
-        );
-        const userEmail = userDoc.data().email;
-        
         if (querySnapshot.empty) {
             maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled.</p>';
             return;
@@ -468,30 +458,6 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
-       
-// Send email notification if not already sent
-            if (!record.notification_sent) {
-                try {
-                    await emailjs.send("service_3qcs1us", "template_default", {
-                        userName: userDoc.data().name || "User",
-                        service_performed: record.service_performed,
-                        follow_up_date: formatDate(record.follow_up_date),
-                        vendor_name: record.vendor_name || "Not specified",
-                        vendor_phone: record.vendor_phone || "Not provided",
-                        notes: record.notes || "",
-                        reply_to: userEmail,
-                        to_email: userEmail
-                    });
-          console.log('Email notification sent for:', record.service_performed);
-// Update the document to mark notification as sent
-                    await window.firestore.updateDoc(doc.ref, {
-                        notification_sent: true
-                    });
-                } catch (error) {
-                    console.error('Error sending email:', error);
-                }
-            }
-            
             html += `
                 <div class="service-record">
                     <h4>${record.service_performed}</h4>
