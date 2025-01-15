@@ -729,7 +729,7 @@ async function testEmailReminder() {
         
 //load allservices list
         
-async function loadAllServices(userId, year = 'all') {
+async function loadAllServices(userId, property = 'all', category = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
         let q = window.firestore.query(
@@ -738,63 +738,53 @@ async function loadAllServices(userId, year = 'all') {
             window.firestore.orderBy('date_of_service', 'desc')
         );
 
-        // Filter by year if not "all"
-        if (year !== 'all') {
-            const startOfYear = new Date(`${year}-01-01`).toISOString();
-            const endOfYear = new Date(`${year}-12-31`).toISOString();
-            q = window.firestore.query(
-                q,
-                window.firestore.where('date_of_service', '>=', startOfYear),
-                window.firestore.where('date_of_service', '<=', endOfYear)
-            );
+        // Filter by property if selected
+        if (property !== 'all') {
+            q = window.firestore.query(q, window.firestore.where('property', '==', property));
         }
 
+        // Fetch all docs that match the property filter
         const querySnapshot = await window.firestore.getDocs(q);
 
-        if (querySnapshot.empty) {
-            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found for this property or year.</td></tr>';
+        // Filter by category if selected
+        let filteredDocs = querySnapshot.docs;
+        if (category !== 'all') {
+            filteredDocs = filteredDocs.filter(doc => doc.data().category === category);
+        }
+
+        if (filteredDocs.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found.</td></tr>';
             return;
         }
 
+        // Build the table HTML
         let html = '';
-        querySnapshot.forEach((doc) => {
+        filteredDocs.forEach((doc) => {
             const record = doc.data();
             html += `
-                <tr style="border-bottom: 0px solid #dee2e6;">
-                    <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
-                    <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-                    <td style="padding: 10px; text-align: center; font-size: 0.90em;">
-                        <button onclick="openEditModal('${doc.id}')" 
-                                style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
-                            ✏️
-                        </button>
-                        <button onclick="deleteRecord('${doc.id}')" 
-                                style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
-                            ❌
-                        </button>
+                <tr>
+                    <td>${formatDate(record.date_of_service)}</td>
+                    <td>${record.property || 'Main Property'}</td>
+                    <td>${record.category}</td>
+                    <td>${record.service_performed}</td>
+                    <td>${record.vendor_name || 'Not specified'}</td>
+                    <td style="text-align: right;">$${record.cost?.toFixed(2) || '0.00'}</td>
+                    <td>${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+                    <td style="text-align: center;">
+                        <button onclick="openEditModal('${doc.id}')">✏️</button>
+                        <button onclick="deleteRecord('${doc.id}')">❌</button>
                     </td>
                 </tr>
-                ${record.notes ? `
-                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
-                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                        <strong>Notes:</strong> ${record.notes}
-                    </td>
-                </tr>
-                ` : ''}
             `;
         });
 
         tableBody.innerHTML = html;
     } catch (error) {
         console.error('Error loading all services:', error);
-        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Error loading services.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading services.</td></tr>';
     }
 }
+
 
 
 
