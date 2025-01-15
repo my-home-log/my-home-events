@@ -506,6 +506,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     }
 }
 
+//  Check for Send reminders        
 async function checkAndSendReminders(records) {
     const today = new Date();
     const thirtyDaysFromNow = new Date();
@@ -538,7 +539,8 @@ async function checkAndSendReminders(records) {
     }
 }
 
-//Send Reminder Emails        
+//Send Reminder Emails 
+        
 async function sendReminderEmail(record) {
    const calendarLinks = createCalendarLinks(
         record.service_performed,
@@ -555,7 +557,9 @@ async function sendReminderEmail(record) {
     date_of_service: formatDate(record.date_of_service),
     vendor_name: record.vendor_name || 'Not specified',
     vendor_phone: record.vendor_phone || 'Not provided',
-    notes: record.notes || 'No additional notes'
+    notes: record.notes || 'No additional notes',
+        googleCalendarLink: calendarLinks.googleUrl,
+        iCalLink: calendarLinks.iCalUrl
 };
 
     try {
