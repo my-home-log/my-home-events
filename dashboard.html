@@ -727,7 +727,7 @@ async function testEmailReminder() {
         
 //load allservices list
         
-async function loadAllServices(userId, year = 'all') {
+async function loadAllServices(userId, category = 'all') {
     const tableBody = document.getElementById('allServicesTable');
     try {
         let q = window.firestore.query(
