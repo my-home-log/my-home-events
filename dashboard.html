@@ -507,7 +507,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 async function checkAndSendReminders(records) {
     const today = new Date();
     const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
+    thirtyDaysFromNow.setDate(today.getDate() + 180);
 
     for (const record of records) {
         const followUpDate = new Date(record.follow_up_date);
