@@ -736,14 +736,14 @@ async function loadAllServices(userId, category = 'all') {
             window.firestore.orderBy('date_of_service', 'desc')
         );
 
-        // Filter by year if not "all"
-        //if (year !== 'all') {
-            //const startOfYear = new Date(`${year}-01-01`).toISOString();
-            //const endOfYear = new Date(`${year}-12-31`).toISOString();
-            //q = window.firestore.query(
-                //q,
-                //window.firestore.where('date_of_service', '>=', startOfYear),
-                //window.firestore.where('date_of_service', '<=', endOfYear)
+         Filter by year if not "all"
+        if (year !== 'all') {
+            const startOfYear = new Date(`${year}-01-01`).toISOString();
+            const endOfYear = new Date(`${year}-12-31`).toISOString();
+            q = window.firestore.query(
+                q,
+                window.firestore.where('date_of_service', '>=', startOfYear),
+                window.firestore.where('date_of_service', '<=', endOfYear)
             );
         }
 
