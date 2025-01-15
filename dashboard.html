@@ -809,7 +809,8 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
         function sortServices(category) {
     const userId = window.auth.currentUser.uid;
     const selectedProperty = document.getElementById('propertyFilter').value;  // Get the currently selected property
-    loadAllServices(userId, selectedProperty, category);  // Pass both property and category
+    const categoryFilter = category === "date_desc" ? "all" : category;
+    loadAllServices(userId, selectedProperty, categoryFilter);  // Pass both property and category
 }
 
         
