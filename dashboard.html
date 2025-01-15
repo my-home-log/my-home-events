@@ -496,6 +496,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     </div>
 `;
         });
+   await checkAndSendReminders(querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id})));     
         maintenanceDiv.innerHTML = html;
     } catch (error) {
         console.error('Error loading upcoming maintenance:', error);
@@ -503,6 +504,23 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     }
 }
 
+async function checkAndSendReminders(records) {
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    for (const record of records) {
+        const followUpDate = new Date(record.follow_up_date);
+        if (followUpDate >= today && followUpDate <= thirtyDaysFromNow) {
+            await sendReminderEmail(record);
+            const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+            await window.firestore.updateDoc(docRef, {
+                reminder_sent: true
+            });
+        }
+    }
+}
+        
 async function sendReminderEmail(record) {
     const templateParams = {
         userName: record.user_name || 'User',
