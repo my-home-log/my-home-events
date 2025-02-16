@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>My Home Events - Log</h1>
+            <h1>HandyHome - My Home Log</h1>
             <button id="logoutButton" class="logout-btn">Logout</button>
         </div>
         
@@ -1035,6 +1035,17 @@ END:VCALENDAR`;
     }
 }
 
+<footer style="text-align: center; padding: 10px; font-size: 12px; color: #666; background-color: #f8f9fa; margin-top: 20px;">
+    <p>&copy; 2025 HandyHome. All rights reserved.</p>
+    <p>This site is for personal use and home maintenance tracking only.</p>
+    <p>Version 30.3 | Last Updated: <span id="lastUpdated"></span></p>
+</footer>
+
+<script>
+    document.getElementById("lastUpdated").textContent = new Date().toLocaleDateString();
+</script>
+
+        
     </script>
 </body>
 </html></html>
