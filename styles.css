@@ -142,31 +142,6 @@
             font-size: 12px;
         }
     
-/* Adjust width of Actions column */
-th:nth-child(9), td:nth-child(9) { 
-    width: 120px;  /* Increase width to fit both icons */
-    text-align: center;
-}
-
-/* Adjust Invoice column width */
-th:nth-child(8), td:nth-child(8) { 
-    width: 60px;  /* Ensure enough space for the paperclip */
-    text-align: center;
-}
-
-/* Ensure all table cells have consistent padding */
-th, td {
-    padding: 12px; 
-    text-align: center;
-}
-
-/* Add spacing between icons in the Actions column */
-td a {
-    display: inline-block;
-    margin: 0 5px; 
-}
-
-
 
 #toggleYearSummary {
     background-color: #D4DCE8;
