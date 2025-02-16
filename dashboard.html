@@ -200,6 +200,11 @@
                         <input type="date" id="followUpDate">
                         <small>For future service reminders</small>
                     </div>
+                      
+                    <div class="form-group">
+                        <label for="invoiceUpload">Upload Invoice/Receipt</label>
+                        <input type="file" id="invoiceUpload" accept="image/*,application/pdf">
+                    </div>  
 
                     <button type="submit" class="add-service-btn">Save Record</button>
                 </form>
@@ -212,6 +217,8 @@
     <script type="module">
        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+
 import { 
     getFirestore, 
     collection, 
@@ -243,6 +250,8 @@ import {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
+        window.storage = storage;  // Make it globally accessible
 
         // Make Firebase services available globally
         window.auth = auth;
@@ -786,31 +795,33 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
         }
 
         let html = '';
-        filteredDocs.forEach((doc) => {
-            const record = doc.data();
-            html += `
-                <tr style="border-bottom: 0px solid #dee2e6;">
-                    <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
-                    <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-                    <td style="padding: 10px; text-align: center; font-size: 0.90em;">
-                        <button onclick="openEditModal('${doc.id}')" style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">✏️</button>
-                        <button onclick="deleteRecord('${doc.id}')" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">❌</button>
-                    </td>
-                </tr>
-                ${record.notes ? `
-                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
-                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                        <strong>Notes:</strong> ${record.notes}
-                    </td>
-                </tr>
-                ` : ''}
-            `;
-        });
+filteredDocs.forEach((doc) => {
+    const record = doc.data();
+    html += `
+        <tr style="border-bottom: 0px solid #dee2e6;">
+            <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
+            <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+    `;
+
+    // Add paperclip icon if an invoice is uploaded
+    if (record.invoice_url) {
+        html += `<td style="text-align: center;">
+            <a href="${record.invoice_url}" target="_blank" title="View Invoice" style="text-decoration: none;">
+                📎
+            </a>
+        </td>`;
+    } else {
+        html += `<td style="text-align: center;">-</td>`;
+    }
+
+    html += `</tr>`;
+});
+
 
         tableBody.innerHTML = html;
     } catch (error) {
@@ -945,7 +956,7 @@ END:VCALENDAR`;
         async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
-    
+
     if (!currentUser) {
         alert('Please log in to save records');
         return;
@@ -954,10 +965,22 @@ END:VCALENDAR`;
     try {
         const submitButton = document.querySelector('.modal-content .add-service-btn');
         const docId = submitButton.getAttribute('data-doc-id');
-        
+        const fileInput = document.getElementById('invoiceUpload');
+        let invoiceUrl = '';
+
+        // Check if a file is uploaded
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${file.name}`);
+            
+            // Upload file
+            const snapshot = await uploadBytes(storageRef, file);
+            invoiceUrl = await getDownloadURL(snapshot.ref);
+        }
+
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
-            property: document.getElementById('property').value || 'Main Property', // Add this
+            property: document.getElementById('property').value || 'Main Property',
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
             notes: document.getElementById('serviceNotes').value,
@@ -965,17 +988,16 @@ END:VCALENDAR`;
             vendor_phone: document.getElementById('vendorPhone').value,
             cost: parseFloat(document.getElementById('cost').value) || 0,
             follow_up_date: document.getElementById('followUpDate').value,
+            invoice_url: invoiceUrl,  // Store invoice URL
             user_id: currentUser.uid
         };
 
         if (docId) {
-            // Update existing record
             await window.firestore.updateDoc(
                 window.firestore.doc(window.db, 'serviceRecords', docId),
                 record
             );
         } else {
-            // Add new record
             record.created_at = new Date().toISOString();
             await window.firestore.addDoc(
                 window.firestore.collection(window.db, 'serviceRecords'),
@@ -983,13 +1005,12 @@ END:VCALENDAR`;
             );
         }
 
-// Refresh all sections
-    
+        // Refresh UI
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(currentUser.uid);
         await loadAllServices(currentUser.uid);
-        
+
         alert(docId ? 'Service record updated successfully!' : 'Service record saved successfully!');
         closeModal();
     } catch (error) {
@@ -997,6 +1018,7 @@ END:VCALENDAR`;
         alert('Error saving record: ' + error.message);
     }
 }
+
     </script>
 </body>
 </html></html>
