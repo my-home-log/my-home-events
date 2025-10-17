@@ -857,6 +857,815 @@ filteredDocs.forEach((doc) => {
 
         function sortServices(category) {
     const userId = window.auth.currentUser.uid;
+    const selectedProperty = document.getElementById('propertyFilter').value;  // Get the currently selected property<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Home Events - Dashboard</title>
+<?Link to Css>
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Home Events</h1>
+            <button id="logoutButton" class="logout-btn">Logout</button>
+        </div>
+        
+        <div class="welcome-message">
+            <h2>Welcome, <span id="userName">User</span>!</h2>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="dashboard-card">
+                <h3>Quick Actions</h3>
+                <button class="add-service-btn" onclick="openModal()">Add New Service Record</button>
+               <button onclick="testEmailReminder()" class="add-service-btn" style="margin-top: 10px;">Test Email Reminder</button>
+               <label for="propertyFilter" style="display: block; margin-top: 40px; font-weight: normal; font-size: 14px;">Select Property:</label>
+               <select id="propertyFilter" onchange="filterByProperty(this.value)" 
+                style="margin-top: 10px; width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
+               <option value="all">All Properties</option>
+             <!-- Options will be dynamically populated -->
+         </select>
+         </div>
+
+            <div class="dashboard-card">
+                <h3>Recent Services</h3>
+                <div id="recentServices" style="max-height: 300px; overflow-y: auto;">
+                    <p>Loading recent services...</p>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Upcoming Maintenance - 6 Months</h3>
+                <div id="upcomingMaintenance">
+                    <p>Your scheduled maintenance tasks will appear here.</p>
+                </div>
+            </div>
+        </div>
+       
+        
+<div class="dashboard-card" style="margin-top: 20px; margin-bottom: 20px; max-width: 100%; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h3 style="margin: 0;">Year Summary</h3>
+    <div>
+        <label for="yearFilter" style="font-weight: bold; margin-right: 10px;">Sort by Year:</label>
+        <select id="yearFilter" onchange="filterByYear(this.value)" 
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
+            <option value="all">All Years</option>
+            <!-- Years will be populated dynamically -->
+        </select>
+    </div>
+</div>
+
+    <div class="summary-stats" style="margin-bottom: 15px; padding: 15px; background-color: #77A8E8; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Total Services:</strong> <span id="serviceCount">0</span>
+            </div>
+            <div>
+                <strong>Total Cost:</strong> <span id="totalCost">$0.00</span>
+            </div>
+        </div>
+    </div>
+    <button id="toggleYearSummary" class="add-service-btn" style="width: 100%; margin-bottom: 10px;">View Events</button>
+    <div id="yearSummaryTableContainer" style="display: none;">
+        <div class="table-container" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Date</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Property</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Category</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Service</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="yearSummaryTable">
+                    <!-- Table rows populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+        
+<div class="dashboard-card" style="margin-top: 20px; max-width: 100%; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h3 style="margin: 0;">All Services</h3>
+    <div>
+        <label for="sortBy" style="font-weight: bold; margin-right: 10px;">Sort by Service Category:</label>
+        <select id="sortBy" onchange="sortServices(this.value)" 
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
+            <option value="date_desc">All Services</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="HVAC">HVAC</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Appliances">Appliances</option>
+            <option value="Structure">Structure/Building</option>
+            <option value="Landscaping">Landscaping</option>
+            <option value="GeneralMaintenance">General Maintenance</option>
+        </select>
+    </div>
+</div>
+
+
+    <div class="table-container" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background-color: #A0B4BD;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Date</th>
+                   <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Property</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Category</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Service</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
+                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="allServicesTable">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">Loading services...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+        
+        <!-- Service Record Modal -->
+        <div id="serviceModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeModal()">&times;</span>
+                <h2>Add New Service Record</h2>
+                <form id="serviceForm" onsubmit="submitServiceRecord(event)">
+                    <div class="form-group">
+                        <label for="serviceDate">Date of Service*</label>
+                        <input type="date" id="serviceDate" required>
+                    </div>
+<div class="form-group">
+    <label for="property">Property</label>
+    <input type="text" id="property" placeholder="e.g., Main House, Rental Unit 1">
+</div>
+                    <div class="form-group">
+                        <label for="serviceCategory">Service Category*</label>
+                        <select id="serviceCategory" required>
+                            <option value="">Select a category...</option>
+                            <option value="Plumbing">Plumbing</option>
+                            <option value="HVAC">HVAC</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Appliances">Appliances</option>
+                            <option value="Structure">Structure/Building</option>
+                            <option value="Landscaping">Landscaping</option>
+                            <option value="GeneralMaintenance">General Maintenance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="servicePerformed">Service Performed*</label>
+                        <input type="text" id="servicePerformed" required 
+                               placeholder="e.g., Septic Pumping, Dishwasher Repair">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="serviceNotes">Service Notes</label>
+                        <textarea id="serviceNotes" 
+                                 placeholder="Describe the service, issues found, recommendations, etc."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendorName">Vendor Name</label>
+                        <input type="text" id="vendorName" placeholder="Company or contractor name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vendorPhone">Vendor Phone</label>
+                        <input type="tel" id="vendorPhone" placeholder="(123) 456-7890">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cost">Cost ($)</label>
+                        <input type="number" id="cost" step="0.01" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="followUpDate">Follow Up Date</label>
+                        <input type="date" id="followUpDate">
+                        <small>For future service reminders</small>
+                    </div>
+
+                    <button type="submit" class="add-service-btn">Save Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-- Firebase Integration -->
+    
+    <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc,
+    deleteDoc,
+    doc,
+    getDoc,
+    updateDoc,
+    query, 
+    where, 
+    orderBy, 
+    limit,
+    getDocs,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        
+// Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxpDkK5iruNwwW5_RevYd0q9hut6rhQNM",
+            authDomain: "my-home-events.firebaseapp.com",
+            projectId: "my-home-events",
+            storageBucket: "my-home-events.firestorage.app",
+            messagingSenderId: "132719765347",
+            appId: "1:132719765347:web:5a2b8d16d39c3e58f35556",
+            measurementId: "G-4TXVSJ70QW"
+        };
+
+// Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make Firebase services available globally
+        window.auth = auth;
+        window.db = db;
+        // Make Firebase services available globally
+window.firestore = {
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    getDoc,
+    updateDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    onSnapshot
+};
+
+// Load recent services when user is authenticated
+        
+        auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        document.getElementById('userName').textContent = user.displayName || user.email;
+        await populatePropertyFilter(user.uid); // Call to populate dropdown
+        await loadRecentServices(user.uid);
+        await loadUpcomingMaintenance(user.uid);
+        await loadYearSummary(user.uid); // Add this line
+        await loadAllServices(user.uid);
+    } else {
+        window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+    }
+});
+
+// Logout Functionality
+        
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'https://my-home-log.github.io/my-home-events/index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        });
+    </script>
+
+<!-- Application Functions -->
+    <script>
+
+emailjs.init('1r8AlMuY3PpUaYgjn');       
+
+// Modal control functions
+        
+        function openModal() {
+            document.getElementById('serviceModal').style.display = 'block';
+           document.getElementById('property').value = record.property || ''; 
+            // Set today's date as default
+            //document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function closeModal() {
+    document.getElementById('serviceModal').style.display = 'none';
+    document.getElementById('serviceForm').reset();
+    // Reset modal title and submit button
+    document.querySelector('.modal-content h2').textContent = 'Add New Service Record';
+    const submitButton = document.querySelector('.modal-content .add-service-btn');
+    submitButton.textContent = 'Save Record';
+    submitButton.removeAttribute('data-doc-id');
+}
+
+// Edit Record
+        
+      async function openEditModal(docId) {
+    const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
+    const docSnap = await window.firestore.getDoc(docRef);
+    const record = docSnap.data();
+
+    // Populate modal fields
+    document.getElementById('serviceDate').value = record.date_of_service;
+    document.getElementById('serviceCategory').value = record.category;
+    document.getElementById('servicePerformed').value = record.service_performed;
+    document.getElementById('serviceNotes').value = record.notes || '';
+    document.getElementById('vendorName').value = record.vendor_name || '';
+    document.getElementById('vendorPhone').value = record.vendor_phone || '';
+    document.getElementById('cost').value = record.cost || '';
+    document.getElementById('followUpDate').value = record.follow_up_date || '';
+
+    // Change modal title and submit button
+    document.querySelector('.modal-content h2').textContent = 'Edit Service Record';
+    const submitButton = document.querySelector('.modal-content .add-service-btn');
+    submitButton.textContent = 'Update Record';
+    
+// Store docId for update
+    submitButton.setAttribute('data-doc-id', docId);
+
+// Show modal
+    document.getElementById('serviceModal').style.display = 'block';
+}  
+        
+// Delete record function
+        
+    async function deleteRecord(docId) {
+    if (!confirm('Are you sure you want to delete this record?')) {
+        return;
+    }
+
+    try {
+        const docRef = window.firestore.doc(window.db, 'serviceRecords', docId);
+        await window.firestore.deleteDoc(docRef);
+        const userId = window.auth.currentUser.uid;
+        
+// Refresh all sections
+        await populatePropertyFilter(userId); // Call to populate dropdown
+        await loadRecentServices(userId);
+        await loadUpcomingMaintenance(userId);
+        await loadYearSummary(userId);
+        await loadAllServices(userId);
+        
+        alert('Record deleted successfully');
+    } catch (error) {
+        console.error('Error deleting record:', error);
+        alert('Error deleting record');
+    }
+}
+// Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('serviceModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+//filterByProperty
+        function filterByProperty(property) {
+    const userId = window.auth.currentUser.uid;
+
+    // Call all sections with the selected property
+    loadRecentServices(userId, property);
+    loadUpcomingMaintenance(userId, property);
+    loadYearSummary(userId, property);
+    loadAllServices(userId, property);
+}
+
+        
+//populatepropertyfilter
+    async function populatePropertyFilter(userId) {
+    const propertyFilter = document.getElementById('propertyFilter');
+    try {
+        // Fetch all service records for the user
+        const q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId)
+        );
+
+        const querySnapshot = await window.firestore.getDocs(q);
+
+        // Use a Set to ensure unique property names
+        const properties = new Set(['All Properties']); // Default option
+
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            if (record.property) {
+                properties.add(record.property);
+            }
+        });
+
+        // Populate the dropdown
+        propertyFilter.innerHTML = ''; // Clear existing options
+        properties.forEach((property) => {
+            const option = document.createElement('option');
+            option.value = property === 'All Properties' ? 'all' : property;
+            option.textContent = property;
+            propertyFilter.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating property filter:', error);
+        propertyFilter.innerHTML = '<option value="all">Error loading properties</option>';
+    }
+}
+
+        
+// Loading Upcoming Maintenance function
+        
+async function loadUpcomingMaintenance(userId, property = 'all') {
+    const maintenanceDiv = document.getElementById('upcomingMaintenance');
+    try {
+        const today = new Date();
+        const sixMonthsFromNow = new Date();
+        sixMonthsFromNow.setMonth(today.getMonth() + 6);
+
+        // Base query for user_id and follow_up_date range
+        let q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.where('follow_up_date', '>=', today.toISOString().split('T')[0]),
+            window.firestore.where('follow_up_date', '<=', sixMonthsFromNow.toISOString().split('T')[0]),
+            window.firestore.orderBy('follow_up_date', 'asc')
+        );
+
+        // Add property filter only if not "all"
+        if (property !== 'all') {
+            q = window.firestore.query(
+                q,
+                window.firestore.where('property', '==', property)
+            );
+        }
+
+        const querySnapshot = await window.firestore.getDocs(q);
+
+        if (querySnapshot.empty) {
+            maintenanceDiv.innerHTML = '<p>No upcoming maintenance scheduled.</p>';
+            return;
+        }
+
+        let html = '';
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            html += `
+                <div class="service-record">
+                    <h4>${record.service_performed}</h4>
+                    <p class="date">${formatDate(record.date_of_service)}</p>
+                    <p><strong>Follow-up Date:</strong> ${formatDate(record.follow_up_date)}</p>
+                    <p><strong>Vendor:</strong> ${record.vendor_name || 'Not specified'}</p>
+                    <p><strong>Vendor Phone:</strong> ${record.vendor_phone || 'Not provided'}</p>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+
+            
+            <a href="${createCalendarLinks(
+            record.service_performed,
+            record.follow_up_date,
+            `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            ).googleUrl}" 
+        target="_blank" 
+        class="calendar-btn"
+        style="background-color: #609BE8; color: #FFF; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: 600; font-size: 12px; margin-right: 10px;">
+        <img src="images/add-calendar-clear.png" alt="Add to Google Calendar" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 6px;">
+   Add to Google
+</a>
+
+           <a href="${createCalendarLinks(
+           record.service_performed,
+           record.follow_up_date,
+           `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+           ).iCalUrl}" 
+           download="maintenance-reminder.ics"
+          class="calendar-btn"
+          style="background-color: #A0B4BD; color: #000; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: 600; font-size: 12px;">
+          <img src="images/add-calendar-clear.png" alt="Add to Other Calendars" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 6px;">
+   Add to Other
+</a>
+        </div>
+    </div>
+`;
+        });
+   await checkAndSendReminders(querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id})));     
+        maintenanceDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading upcoming maintenance:', error);
+        maintenanceDiv.innerHTML = '<p>Error loading upcoming maintenance.</p>';
+    }
+}
+
+async function checkAndSendReminders(records) {
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 180);
+
+    for (const record of records) {
+        // Only send if reminder hasn't been sent yet
+        if (!record.reminder_sent) {
+            const followUpDate = new Date(record.follow_up_date);
+            if (followUpDate >= today && followUpDate <= thirtyDaysFromNow) {
+                await sendReminderEmail(record);
+                const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+                await window.firestore.updateDoc(docRef, {
+                    reminder_sent: true
+                });
+            }
+        }
+    }
+}
+        
+async function sendReminderEmail(record) {
+   const templateParams = {
+    user: auth.currentUser.displayName || auth.currentUser.email,  // Change from userName
+    to_email: auth.currentUser.email,
+    service_performed: record.service_performed,
+    follow_up_date: formatDate(record.follow_up_date),
+    property: record.property || 'Main Property',
+    date_of_service: formatDate(record.date_of_service),
+    vendor_name: record.vendor_name || 'Not specified',
+    vendor_phone: record.vendor_phone || 'Not provided',
+    notes: record.notes || 'No additional notes'
+};
+
+    try {
+        await emailjs.send(
+            'service_3qcs1us',  // Your EmailJS service ID
+            'template_3dpcmaf',      // Replace with your template ID
+            templateParams,
+            '1r8AlMuY3PpUaYgjn'   // Replace with your public key
+        );
+        console.log('Reminder email sent successfully');
+    } catch (error) {
+        console.error('Failed to send reminder:', error);
+    }
+}
+        
+// Add this test function
+async function testEmailReminder() {
+    const testRecord = {
+        user_name: 'Test User',
+        service_performed: 'Test Service',
+        follow_up_date: new Date().toISOString(),
+        vendor_name: 'Test Vendor',
+        vendor_phone: '555-0123',
+        notes: 'Test reminder email'
+    };
+
+    await sendReminderEmail(testRecord);
+}
+        
+// loadYearlySummary
+        
+      async function loadYearSummary(userId, property = 'all') {
+    try {
+        // Base query: Filter by user_id and order by date_of_service
+        let q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
+
+        // Add property filter only if a specific property is selected
+        if (property !== 'all') {
+            q = window.firestore.query(
+                q,
+                window.firestore.where('property', '==', property)
+            );
+        }
+
+        // Execute the query
+        const querySnapshot = await window.firestore.getDocs(q);
+
+        // Handle empty results
+        if (querySnapshot.empty) {
+            console.log('No records found for the selected property or year.');
+            document.getElementById('yearSummaryTable').innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 20px;">No records found.</td>
+                </tr>`;
+            return;
+        }
+
+        // Collect unique years from the results
+        const years = new Set();
+        const yearSelect = document.getElementById('yearFilter');
+
+        // Store docs globally for filtering
+        window.yearSummaryDocs = querySnapshot.docs;
+
+        querySnapshot.forEach((doc) => {
+            const record = doc.data();
+            const year = new Date(record.date_of_service).getFullYear();
+            years.add(year);
+        });
+
+        // Populate the year dropdown
+        yearSelect.innerHTML = '<option value="all">All Years</option>';
+        Array.from(years).sort((a, b) => b - a).forEach((year) => {
+            yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+        });
+
+        // Update year summary stats for "All Years"
+        updateYearStats('all', querySnapshot.docs);
+    } catch (error) {
+        console.error('Error loading year summary:', error);
+        document.getElementById('yearSummaryTable').innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 20px;">Error loading year summary.</td>
+            </tr>`;
+    }
+}
+
+//toggle for summary table
+    document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('toggleYearSummary');
+    const tableContainer = document.getElementById('yearSummaryTableContainer');
+
+    toggleButton.addEventListener('click', () => {
+        console.log("Button clicked"); // Check if the button is being clicked
+        if (tableContainer.style.display === 'none') {
+            console.log("Showing table"); // Confirm this branch is reached
+            tableContainer.style.display = 'block';
+            toggleButton.textContent = 'Hide Events';
+        } else {
+            console.log("Hiding table"); // Confirm this branch is reached
+            tableContainer.style.display = 'none';
+            toggleButton.textContent = 'View Events';
+        }
+    });
+});
+
+// Update Year Stats        
+    function updateYearStats(selectedYear, docs) {
+    const serviceCount = document.getElementById('serviceCount');
+    const totalCost = document.getElementById('totalCost');
+    const tableBody = document.getElementById('yearSummaryTable');
+    
+    let filteredDocs = docs;
+    if (selectedYear !== 'all') {
+        filteredDocs = docs.filter(doc => {
+            const record = doc.data();
+            return new Date(record.date_of_service).getFullYear() === parseInt(selectedYear);
+        });
+    }
+
+    const total = filteredDocs.reduce((sum, doc) => {
+        const record = doc.data();
+        return sum + (record.cost || 0);
+    }, 0);
+
+    serviceCount.textContent = filteredDocs.length;
+    totalCost.textContent = `$${new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+}).format(total)}`;
+
+
+
+
+
+        
+// Update table
+    if (filteredDocs.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No services found for this period</td></tr>';
+        return;
+    }
+
+    let html = '';
+    filteredDocs.forEach((doc) => {
+        const record = doc.data();
+        html += `
+            <tr style="border-bottom: 0px solid #dee2e6;">
+                <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
+                <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
+                <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
+                <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
+                <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
+                <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
+                <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+                <td style="padding: 10px; text-align: center; font-size: 0.90em;">
+    <button onclick="openEditModal('${doc.id}')" 
+            style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
+        ✏️
+    </button>
+    <button onclick="deleteRecord('${doc.id}')" 
+            style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+        ❌
+    </button>
+</td>
+            </tr>
+            ${record.notes ? `
+            <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
+                <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
+                    <strong>Notes:</strong> ${record.notes}
+                </td>
+            </tr>
+            ` : ''}
+        `;
+    });
+
+    tableBody.innerHTML = html;
+}
+
+//filterByYear
+        
+    function filterByYear(year) {
+    const userId = window.auth.currentUser.uid;
+
+    // Update year summary stats
+    const docs = window.yearSummaryDocs; // Store docs globally
+    updateYearStats(year, docs);
+
+    // Load all services for the selected year or all years
+    //loadAllServices(userId, year === 'all' ? 'all' : year);
+}
+
+        
+//load allservices list
+        
+async function loadAllServices(userId, property = 'all', category = 'all') {
+    const tableBody = document.getElementById('allServicesTable');
+    try {
+        let q = window.firestore.query(
+            window.firestore.collection(window.db, 'serviceRecords'),
+            window.firestore.where('user_id', '==', userId),
+            window.firestore.orderBy('date_of_service', 'desc')
+        );
+
+        // Add property filter if not "all"
+        if (property !== 'all') {
+            q = window.firestore.query(q, window.firestore.where('property', '==', property));
+        }
+
+        const querySnapshot = await window.firestore.getDocs(q);
+        let filteredDocs = querySnapshot.docs;
+
+        // Apply category filter only if a specific category is selected
+        if (category !== 'all') {
+            filteredDocs = filteredDocs.filter(doc => doc.data().category === category);
+        }
+
+        if (filteredDocs.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No services found.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        filteredDocs.forEach((doc) => {
+            const record = doc.data();
+            html += `
+                <tr style="border-bottom: 0px solid #dee2e6;">
+                    <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
+                    <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
+                    <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 0.90em;">
+                        <button onclick="openEditModal('${doc.id}')" style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">✏️</button>
+                        <button onclick="deleteRecord('${doc.id}')" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">❌</button>
+                    </td>
+                </tr>
+                ${record.notes ? `
+                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
+                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
+                        <strong>Notes:</strong> ${record.notes}
+                    </td>
+                </tr>
+                ` : ''}
+            `;
+        });
+
+        tableBody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading all services:', error);
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading services.</td></tr>';
+    }
+}
+
+
+
+
+//sortServices for load All Services sortBy
+    //function sortServices(category) {
+    //const userId = window.auth.currentUser.uid;
+    //loadAllServices(userId, category);
+//}
+
+        function sortServices(category) {
+    const userId = window.auth.currentUser.uid;
     const selectedProperty = document.getElementById('propertyFilter').value;  // Get the currently selected property
     const categoryFilter = category === "date_desc" ? "all" : category;
     loadAllServices(userId, selectedProperty, categoryFilter);  // Pass both property and category
@@ -972,7 +1781,7 @@ END:VCALENDAR`;
         async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
-
+    
     if (!currentUser) {
         alert('Please log in to save records');
         return;
@@ -981,22 +1790,10 @@ END:VCALENDAR`;
     try {
         const submitButton = document.querySelector('.modal-content .add-service-btn');
         const docId = submitButton.getAttribute('data-doc-id');
-        const fileInput = document.getElementById('invoiceUpload');
-        let invoiceUrl = '';
-
-        // Check if a file is uploaded
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${file.name}`);
-            
-            // Upload file
-            const snapshot = await uploadBytes(storageRef, file);
-            invoiceUrl = await getDownloadURL(snapshot.ref);
-        }
-
+        
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
-            property: document.getElementById('property').value || 'Main Property',
+            property: document.getElementById('property').value || 'Main Property', // Add this
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
             notes: document.getElementById('serviceNotes').value,
@@ -1004,16 +1801,17 @@ END:VCALENDAR`;
             vendor_phone: document.getElementById('vendorPhone').value,
             cost: parseFloat(document.getElementById('cost').value) || 0,
             follow_up_date: document.getElementById('followUpDate').value,
-            invoice_url: invoiceUrl,  // Store invoice URL
             user_id: currentUser.uid
         };
 
         if (docId) {
+            // Update existing record
             await window.firestore.updateDoc(
                 window.firestore.doc(window.db, 'serviceRecords', docId),
                 record
             );
         } else {
+            // Add new record
             record.created_at = new Date().toISOString();
             await window.firestore.addDoc(
                 window.firestore.collection(window.db, 'serviceRecords'),
@@ -1021,12 +1819,13 @@ END:VCALENDAR`;
             );
         }
 
-        // Refresh UI
+// Refresh all sections
+    
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(currentUser.uid);
         await loadAllServices(currentUser.uid);
-
+        
         alert(docId ? 'Service record updated successfully!' : 'Service record saved successfully!');
         closeModal();
     } catch (error) {
@@ -1035,19 +1834,6 @@ END:VCALENDAR`;
     }
 }
     </script>
-<footer style="text-align: center; padding: 10px; font-size: 12px; color: #666; background-color: #f8f9fa; margin-top: 20px;">
-    <p>&copy; 2024 HandyHome. All rights reserved.</p>
-    <p>This site is for personal use and home maintenance tracking only.</p>
-    <p>Version 30.4 | Last Updated: <span id="lastUpdated"></span></p>
-</footer>
-
-<script>
-    document.getElementById("lastUpdated").textContent = new Date().toLocaleDateString();
-</script>
-
-</body>
-</html>
-
-
 </body>
 </html></html>
+
