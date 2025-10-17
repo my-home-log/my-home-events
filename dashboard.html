@@ -990,11 +990,11 @@ END:VCALENDAR`;
         // Check if a file is uploaded
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${file.name}`);
+            const storageRef = window.storageRef(window.storage, `invoices/${currentUser.uid}/${file.name}`);
             
             // Upload file
-            const snapshot = await uploadBytes(storageRef, file);
-            invoiceUrl = await getDownloadURL(snapshot.ref);
+            const snapshot = await window.uploadBytes(storageRef, file);
+invoiceUrl = await window.getDownloadURL(snapshot.ref);
         }
 
         const record = {
