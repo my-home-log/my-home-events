@@ -127,7 +127,6 @@
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
                     <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Invoice</th>
                     <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
                 </tr>
             </thead>
@@ -202,11 +201,6 @@
                         <small>For future service reminders</small>
                     </div>
                       
-                    <div class="form-group">
-                        <label for="invoiceUpload">Upload Invoice/Receipt</label>
-                        <input type="file" id="invoiceUpload" accept="image/*,application/pdf">
-                    </div>  
-
                     <button type="submit" class="add-service-btn">Save Record</button>
                 </form>
             </div>
@@ -812,16 +806,7 @@ filteredDocs.forEach((doc) => {
             <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
     `;
 
-    // Add invoice paperclip column before Actions
-    if (record.invoice_url) {
-        html += `<td style="text-align: center;">
-            <a href="${record.invoice_url}" target="_blank" title="View Invoice" style="text-decoration: none;">
-                📎
-            </a>
-        </td>`;
-    } else {
-        html += `<td style="text-align: center;">-</td>`;
-    }
+
 
     // Keep Actions column (Edit & Delete buttons)
     html += `
@@ -984,19 +969,7 @@ END:VCALENDAR`;
     try {
         const submitButton = document.querySelector('.modal-content .add-service-btn');
         const docId = submitButton.getAttribute('data-doc-id');
-        const fileInput = document.getElementById('invoiceUpload');
-        let invoiceUrl = '';
-
-        // Check if a file is uploaded
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const storageRef = window.storageRef(window.storage, `invoices/${currentUser.uid}/${file.name}`);
-            
-            // Upload file
-            const snapshot = await window.uploadBytes(storageRef, file);
-invoiceUrl = await window.getDownloadURL(snapshot.ref);
-        }
-
+       
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
             property: document.getElementById('property').value || 'Main Property',
@@ -1007,7 +980,6 @@ invoiceUrl = await window.getDownloadURL(snapshot.ref);
             vendor_phone: document.getElementById('vendorPhone').value,
             cost: parseFloat(document.getElementById('cost').value) || 0,
             follow_up_date: document.getElementById('followUpDate').value,
-            invoice_url: invoiceUrl,  // Store invoice URL
             user_id: currentUser.uid
         };
 
