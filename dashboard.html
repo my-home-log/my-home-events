@@ -257,7 +257,10 @@ import {
         // Make Firebase services available globally
         window.auth = auth;
         window.db = db;
-        // Make Firebase services available globally
+        window.storage = storage; // Make Firebase services available globally
+        window.storageRef = ref;
+window.uploadBytes = uploadBytes;
+window.getDownloadURL = getDownloadURL;
 window.firestore = {
     collection,
     addDoc,
