@@ -471,7 +471,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
-            html += 
+            html += `
                 <div class="service-record">
                     <h4>${record.service_performed}</h4>
                     <p class="date">${formatDate(record.date_of_service)}</p>
@@ -484,7 +484,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             <a href="${createCalendarLinks(
             record.service_performed,
             record.follow_up_date,
-            Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
+            `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
             ).googleUrl}" 
         target="_blank" 
         class="calendar-btn"
@@ -496,7 +496,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
            <a href="${createCalendarLinks(
            record.service_performed,
            record.follow_up_date,
-           Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
+           `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
            ).iCalUrl}" 
            download="maintenance-reminder.ics"
           class="calendar-btn"
@@ -506,7 +506,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 </a>
         </div>
     </div>
-;
+`;
         });
    await checkAndSendReminders(querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id})));     
         maintenanceDiv.innerHTML = html;
@@ -555,7 +555,7 @@ async function sendReminderEmail(record) {
    const calendarLinks = createCalendarLinks(
         record.service_performed,
         record.follow_up_date,
-        Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
+        `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
     );
     
     const templateParams = {
@@ -624,10 +624,10 @@ async function testEmailReminder() {
         // Handle empty results
         if (querySnapshot.empty) {
             console.log('No records found for the selected property or year.');
-            document.getElementById('yearSummaryTable').innerHTML = 
+            document.getElementById('yearSummaryTable').innerHTML = `
                 <tr>
                     <td colspan="8" style="text-align: center; padding: 20px;">No records found.</td>
-                </tr>;
+                </tr>`;
             return;
         }
 
@@ -647,17 +647,17 @@ async function testEmailReminder() {
         // Populate the year dropdown
         yearSelect.innerHTML = '<option value="all">All Years</option>';
         Array.from(years).sort((a, b) => b - a).forEach((year) => {
-            yearSelect.innerHTML += <option value="${year}">${year}</option>;
+            yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
         });
 
         // Update year summary stats for "All Years"
         updateYearStats('all', querySnapshot.docs);
     } catch (error) {
         console.error('Error loading year summary:', error);
-        document.getElementById('yearSummaryTable').innerHTML = 
+        document.getElementById('yearSummaryTable').innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; padding: 20px;">Error loading year summary.</td>
-            </tr>;
+            </tr>`;
     }
 }
 
@@ -700,10 +700,10 @@ async function testEmailReminder() {
     }, 0);
 
     serviceCount.textContent = filteredDocs.length;
-    totalCost.textContent = $${new Intl.NumberFormat('en-US', {
+    totalCost.textContent = `$${new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-}).format(total)};
+}).format(total)}`;
 
 
 
@@ -719,7 +719,7 @@ async function testEmailReminder() {
     let html = '';
     filteredDocs.forEach((doc) => {
         const record = doc.data();
-        html += 
+        html += `
             <tr style="border-bottom: 0px solid #dee2e6;">
                 <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
                 <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
@@ -739,14 +739,14 @@ async function testEmailReminder() {
     </button>
 </td>
             </tr>
-            ${record.notes ? 
+            ${record.notes ? `
             <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
                 <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
                     <strong>Notes:</strong> ${record.notes}
                 </td>
             </tr>
-             : ''}
-        ;
+            ` : ''}
+        `;
     });
 
     tableBody.innerHTML = html;
@@ -798,7 +798,7 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
 let html = '';
 filteredDocs.forEach((doc) => {
     const record = doc.data();
-    html += 
+    html += `
         <tr style="border-bottom: 0px solid #dee2e6;">
             <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
             <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
@@ -807,21 +807,21 @@ filteredDocs.forEach((doc) => {
             <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
             <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
             <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-    ;
+    `;
 
     // Add invoice paperclip column before Actions
     if (record.invoice_url) {
-        html += <td style="text-align: center;">
+        html += `<td style="text-align: center;">
             <a href="${record.invoice_url}" target="_blank" title="View Invoice" style="text-decoration: none;">
                 📎
             </a>
-        </td>;
+        </td>`;
     } else {
-        html += <td style="text-align: center;">-</td>;
+        html += `<td style="text-align: center;">-</td>`;
     }
 
     // Keep Actions column (Edit & Delete buttons)
-    html += 
+    html += `
         <td style="padding: 10px; text-align: center; font-size: 0.90em;">
             <button onclick="openEditModal('${doc.id}')" 
                     style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
@@ -832,9 +832,9 @@ filteredDocs.forEach((doc) => {
                 ❌
             </button>
         </td>
-    ;
+    `;
 
-    html += </tr>;
+    html += `</tr>`;
 });
 
 
@@ -874,15 +874,15 @@ filteredDocs.forEach((doc) => {
     const googleParams = {
         action: 'TEMPLATE',
         text: title,
-        dates: ${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')},
+        dates: `${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}`,
         details: description
     };
-    const googleUrl = https://calendar.google.com/calendar/render?${Object.keys(googleParams)
-        .map(key => ${key}=${encodeURIComponent(googleParams[key])})
-        .join('&')};
+    const googleUrl = `https://calendar.google.com/calendar/render?${Object.keys(googleParams)
+        .map(key => `${key}=${encodeURIComponent(googleParams[key])}`)
+        .join('&')}`;
 
 // iCal format (works with Apple Calendar, Outlook, etc.)
-    const iCalParams = BEGIN:VCALENDAR
+    const iCalParams = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 DTSTART:${eventDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
@@ -890,7 +890,7 @@ DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:${title}
 DESCRIPTION:${description}
 END:VEVENT
-END:VCALENDAR;
+END:VCALENDAR`;
 
     const iCalBlob = new Blob([iCalParams], { type: 'text/calendar;charset=utf-8' });
     const iCalUrl = URL.createObjectURL(iCalBlob);
@@ -937,7 +937,7 @@ END:VCALENDAR;
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
-            html += 
+            html += `
 <div class="service-record">
     <div style="display: flex; justify-content: space-between; align-items: start;">
         <div>
@@ -955,7 +955,7 @@ END:VCALENDAR;
             </button>
         </div>
     </div>
-</div>;
+</div>`;
         });
 
         // Update the Recent Services section
@@ -987,7 +987,7 @@ END:VCALENDAR;
         // Check if a file is uploaded
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            const storageRef = ref(window.storage, invoices/${currentUser.uid}/${file.name});
+            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${file.name}`);
             
             // Upload file
             const snapshot = await uploadBytes(storageRef, file);
