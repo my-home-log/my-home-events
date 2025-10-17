@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>My Home Events</h1>
+            <h1>HandyHome - My Home Log</h1>
             <button id="logoutButton" class="logout-btn">Logout</button>
         </div>
         
@@ -20,10 +20,10 @@
         </div>
 
         <div class="dashboard-content">
-            <div class="dashboard-card">
-                <h3>Quick Actions</h3>
-                <button class="add-service-btn" onclick="openModal()">Add New Service Record</button>
-               <button onclick="testEmailReminder()" class="add-service-btn" style="margin-top: 10px;">Test Email Reminder</button>
+            <div class="dashboard-card" style="border: 2px solid #4A90E2; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); border-radius: 8px; background-color: #f7f9fc;">
+    <h3>Quick Actions</h3>
+    <button class="add-service-btn" onclick="openModal()">Add New Service Record</button>
+               
                <label for="propertyFilter" style="display: block; margin-top: 40px; font-weight: normal; font-size: 14px;">Select Property:</label>
                <select id="propertyFilter" onchange="filterByProperty(this.value)" 
                 style="margin-top: 10px; width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; background-color: white;">
@@ -127,6 +127,7 @@
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Vendor</th>
                     <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 400;">Cost</th>
                     <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Follow-up</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 400;">Invoice</th>
                     <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 400;">Actions</th>
                 </tr>
             </thead>
@@ -200,6 +201,11 @@
                         <input type="date" id="followUpDate">
                         <small>For future service reminders</small>
                     </div>
+                      
+                    <div class="form-group">
+                        <label for="invoiceUpload">Upload Invoice/Receipt</label>
+                        <input type="file" id="invoiceUpload" accept="image/*,application/pdf">
+                    </div>  
 
                     <button type="submit" class="add-service-btn">Save Record</button>
                 </form>
@@ -212,6 +218,8 @@
     <script type="module">
        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+
 import { 
     getFirestore, 
     collection, 
@@ -243,6 +251,8 @@ import {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
+        window.storage = storage;  // Make it globally accessible
 
         // Make Firebase services available globally
         window.auth = auth;
@@ -461,7 +471,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
-            html += `
+            html += 
                 <div class="service-record">
                     <h4>${record.service_performed}</h4>
                     <p class="date">${formatDate(record.date_of_service)}</p>
@@ -474,7 +484,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
             <a href="${createCalendarLinks(
             record.service_performed,
             record.follow_up_date,
-            `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+            Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
             ).googleUrl}" 
         target="_blank" 
         class="calendar-btn"
@@ -486,7 +496,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
            <a href="${createCalendarLinks(
            record.service_performed,
            record.follow_up_date,
-           `Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}`
+           Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
            ).iCalUrl}" 
            download="maintenance-reminder.ics"
           class="calendar-btn"
@@ -496,7 +506,7 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 </a>
         </div>
     </div>
-`;
+;
         });
    await checkAndSendReminders(querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id})));     
         maintenanceDiv.innerHTML = html;
@@ -506,28 +516,49 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
     }
 }
 
+//  Check for Send reminders        
 async function checkAndSendReminders(records) {
     const today = new Date();
     const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 180);
+    const ninetyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+    ninetyDaysFromNow.setDate(today.getDate() + 90);
 
     for (const record of records) {
-        // Only send if reminder hasn't been sent yet
-        if (!record.reminder_sent) {
+        if (!record.reminder_sent_90 || !record.reminder_sent_30) {
             const followUpDate = new Date(record.follow_up_date);
-            if (followUpDate >= today && followUpDate <= thirtyDaysFromNow) {
+            
+            // 90-day reminder
+            if (!record.reminder_sent_90 && followUpDate >= today && followUpDate <= ninetyDaysFromNow) {
                 await sendReminderEmail(record);
                 const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
                 await window.firestore.updateDoc(docRef, {
-                    reminder_sent: true
+                    reminder_sent_90: true
+                });
+            }
+            
+            // 30-day reminder
+            if (!record.reminder_sent_30 && followUpDate >= today && followUpDate <= thirtyDaysFromNow) {
+                await sendReminderEmail(record);
+                const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+                await window.firestore.updateDoc(docRef, {
+                    reminder_sent_30: true
                 });
             }
         }
     }
 }
+
+//Send Reminder Emails 
         
 async function sendReminderEmail(record) {
-   const templateParams = {
+   const calendarLinks = createCalendarLinks(
+        record.service_performed,
+        record.follow_up_date,
+        Maintenance due for ${record.service_performed}. Vendor: ${record.vendor_name || 'Not specified'}
+    );
+    
+    const templateParams = {
     user: auth.currentUser.displayName || auth.currentUser.email,  // Change from userName
     to_email: auth.currentUser.email,
     service_performed: record.service_performed,
@@ -536,7 +567,9 @@ async function sendReminderEmail(record) {
     date_of_service: formatDate(record.date_of_service),
     vendor_name: record.vendor_name || 'Not specified',
     vendor_phone: record.vendor_phone || 'Not provided',
-    notes: record.notes || 'No additional notes'
+    notes: record.notes || 'No additional notes',
+        googleCalendarLink: calendarLinks.googleUrl,
+        iCalLink: calendarLinks.iCalUrl
 };
 
     try {
@@ -591,10 +624,10 @@ async function testEmailReminder() {
         // Handle empty results
         if (querySnapshot.empty) {
             console.log('No records found for the selected property or year.');
-            document.getElementById('yearSummaryTable').innerHTML = `
+            document.getElementById('yearSummaryTable').innerHTML = 
                 <tr>
                     <td colspan="8" style="text-align: center; padding: 20px;">No records found.</td>
-                </tr>`;
+                </tr>;
             return;
         }
 
@@ -614,17 +647,17 @@ async function testEmailReminder() {
         // Populate the year dropdown
         yearSelect.innerHTML = '<option value="all">All Years</option>';
         Array.from(years).sort((a, b) => b - a).forEach((year) => {
-            yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+            yearSelect.innerHTML += <option value="${year}">${year}</option>;
         });
 
         // Update year summary stats for "All Years"
         updateYearStats('all', querySnapshot.docs);
     } catch (error) {
         console.error('Error loading year summary:', error);
-        document.getElementById('yearSummaryTable').innerHTML = `
+        document.getElementById('yearSummaryTable').innerHTML = 
             <tr>
                 <td colspan="8" style="text-align: center; padding: 20px;">Error loading year summary.</td>
-            </tr>`;
+            </tr>;
     }
 }
 
@@ -667,10 +700,10 @@ async function testEmailReminder() {
     }, 0);
 
     serviceCount.textContent = filteredDocs.length;
-    totalCost.textContent = `$${new Intl.NumberFormat('en-US', {
+    totalCost.textContent = $${new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-}).format(total)}`;
+}).format(total)};
 
 
 
@@ -686,7 +719,7 @@ async function testEmailReminder() {
     let html = '';
     filteredDocs.forEach((doc) => {
         const record = doc.data();
-        html += `
+        html += 
             <tr style="border-bottom: 0px solid #dee2e6;">
                 <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
                 <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
@@ -706,14 +739,14 @@ async function testEmailReminder() {
     </button>
 </td>
             </tr>
-            ${record.notes ? `
+            ${record.notes ? 
             <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
                 <td colspan="7" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
                     <strong>Notes:</strong> ${record.notes}
                 </td>
             </tr>
-            ` : ''}
-        `;
+             : ''}
+        ;
     });
 
     tableBody.innerHTML = html;
@@ -762,32 +795,49 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
             return;
         }
 
-        let html = '';
-        filteredDocs.forEach((doc) => {
-            const record = doc.data();
-            html += `
-                <tr style="border-bottom: 0px solid #dee2e6;">
-                    <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
-                    <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
-                    <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
-                    <td style="padding: 10px; text-align: center; font-size: 0.90em;">
-                        <button onclick="openEditModal('${doc.id}')" style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">✏️</button>
-                        <button onclick="deleteRecord('${doc.id}')" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">❌</button>
-                    </td>
-                </tr>
-                ${record.notes ? `
-                <tr style="border-bottom: 2px solid #dee2e6; background-color: #f8f9fa;">
-                    <td colspan="8" style="padding: 8px 24px; font-size: 0.9em; color: #666;">
-                        <strong>Notes:</strong> ${record.notes}
-                    </td>
-                </tr>
-                ` : ''}
-            `;
-        });
+let html = '';
+filteredDocs.forEach((doc) => {
+    const record = doc.data();
+    html += 
+        <tr style="border-bottom: 0px solid #dee2e6;">
+            <td style="padding: 10px; font-size: 0.90em;">${formatDate(record.date_of_service)}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.property || 'Main Property'}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.category}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.service_performed}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.vendor_name || 'Not specified'}</td>
+            <td style="padding: 10px; text-align: right; font-size: 0.90em;">$${record.cost?.toFixed(2) || '0.00'}</td>
+            <td style="padding: 10px; font-size: 0.90em;">${record.follow_up_date ? formatDate(record.follow_up_date) : 'None'}</td>
+    ;
+
+    // Add invoice paperclip column before Actions
+    if (record.invoice_url) {
+        html += <td style="text-align: center;">
+            <a href="${record.invoice_url}" target="_blank" title="View Invoice" style="text-decoration: none;">
+                📎
+            </a>
+        </td>;
+    } else {
+        html += <td style="text-align: center;">-</td>;
+    }
+
+    // Keep Actions column (Edit & Delete buttons)
+    html += 
+        <td style="padding: 10px; text-align: center; font-size: 0.90em;">
+            <button onclick="openEditModal('${doc.id}')" 
+                    style="background: none; border: none; color: #609BE8; cursor: pointer; padding: 5px; margin-right: 5px;">
+                ✏️
+            </button>
+            <button onclick="deleteRecord('${doc.id}')" 
+                    style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 5px;">
+                ❌
+            </button>
+        </td>
+    ;
+
+    html += </tr>;
+});
+
+
 
         tableBody.innerHTML = html;
     } catch (error) {
@@ -824,15 +874,15 @@ async function loadAllServices(userId, property = 'all', category = 'all') {
     const googleParams = {
         action: 'TEMPLATE',
         text: title,
-        dates: `${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}`,
+        dates: ${eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')}/${endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/g, '')},
         details: description
     };
-    const googleUrl = `https://calendar.google.com/calendar/render?${Object.keys(googleParams)
-        .map(key => `${key}=${encodeURIComponent(googleParams[key])}`)
-        .join('&')}`;
+    const googleUrl = https://calendar.google.com/calendar/render?${Object.keys(googleParams)
+        .map(key => ${key}=${encodeURIComponent(googleParams[key])})
+        .join('&')};
 
 // iCal format (works with Apple Calendar, Outlook, etc.)
-    const iCalParams = `BEGIN:VCALENDAR
+    const iCalParams = BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 DTSTART:${eventDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
@@ -840,7 +890,7 @@ DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:${title}
 DESCRIPTION:${description}
 END:VEVENT
-END:VCALENDAR`;
+END:VCALENDAR;
 
     const iCalBlob = new Blob([iCalParams], { type: 'text/calendar;charset=utf-8' });
     const iCalUrl = URL.createObjectURL(iCalBlob);
@@ -887,7 +937,7 @@ END:VCALENDAR`;
         let html = '';
         querySnapshot.forEach((doc) => {
             const record = doc.data();
-            html += `
+            html += 
 <div class="service-record">
     <div style="display: flex; justify-content: space-between; align-items: start;">
         <div>
@@ -905,7 +955,7 @@ END:VCALENDAR`;
             </button>
         </div>
     </div>
-</div>`;
+</div>;
         });
 
         // Update the Recent Services section
@@ -922,7 +972,7 @@ END:VCALENDAR`;
         async function submitServiceRecord(event) {
     event.preventDefault();
     const currentUser = window.auth.currentUser;
-    
+
     if (!currentUser) {
         alert('Please log in to save records');
         return;
@@ -931,10 +981,22 @@ END:VCALENDAR`;
     try {
         const submitButton = document.querySelector('.modal-content .add-service-btn');
         const docId = submitButton.getAttribute('data-doc-id');
-        
+        const fileInput = document.getElementById('invoiceUpload');
+        let invoiceUrl = '';
+
+        // Check if a file is uploaded
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const storageRef = ref(window.storage, invoices/${currentUser.uid}/${file.name});
+            
+            // Upload file
+            const snapshot = await uploadBytes(storageRef, file);
+            invoiceUrl = await getDownloadURL(snapshot.ref);
+        }
+
         const record = {
             date_of_service: document.getElementById('serviceDate').value,
-            property: document.getElementById('property').value || 'Main Property', // Add this
+            property: document.getElementById('property').value || 'Main Property',
             category: document.getElementById('serviceCategory').value,
             service_performed: document.getElementById('servicePerformed').value,
             notes: document.getElementById('serviceNotes').value,
@@ -942,17 +1004,16 @@ END:VCALENDAR`;
             vendor_phone: document.getElementById('vendorPhone').value,
             cost: parseFloat(document.getElementById('cost').value) || 0,
             follow_up_date: document.getElementById('followUpDate').value,
+            invoice_url: invoiceUrl,  // Store invoice URL
             user_id: currentUser.uid
         };
 
         if (docId) {
-            // Update existing record
             await window.firestore.updateDoc(
                 window.firestore.doc(window.db, 'serviceRecords', docId),
                 record
             );
         } else {
-            // Add new record
             record.created_at = new Date().toISOString();
             await window.firestore.addDoc(
                 window.firestore.collection(window.db, 'serviceRecords'),
@@ -960,13 +1021,12 @@ END:VCALENDAR`;
             );
         }
 
-// Refresh all sections
-    
+        // Refresh UI
         await loadRecentServices(currentUser.uid);
         await loadUpcomingMaintenance(currentUser.uid);
         await loadYearSummary(currentUser.uid);
         await loadAllServices(currentUser.uid);
-        
+
         alert(docId ? 'Service record updated successfully!' : 'Service record saved successfully!');
         closeModal();
     } catch (error) {
@@ -975,7 +1035,19 @@ END:VCALENDAR`;
     }
 }
     </script>
+<footer style="text-align: center; padding: 10px; font-size: 12px; color: #666; background-color: #f8f9fa; margin-top: 20px;">
+    <p>&copy; 2024 HandyHome. All rights reserved.</p>
+    <p>This site is for personal use and home maintenance tracking only.</p>
+    <p>Version 30.4 | Last Updated: <span id="lastUpdated"></span></p>
+</footer>
+
+<script>
+    document.getElementById("lastUpdated").textContent = new Date().toLocaleDateString();
+</script>
+
+</body>
+</html>
+
+
 </body>
 </html></html>
-
-
