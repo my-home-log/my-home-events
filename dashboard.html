@@ -253,6 +253,8 @@ import {
         const db = getFirestore(app);
         const storage = getStorage(app);
         window.storage = storage;  // Make it globally accessible
+        // Make Storage helpers available to the next script
+window.storageApi = { ref, uploadBytes, getDownloadURL };
 
         // Make Firebase services available globally
         window.auth = auth;
