@@ -990,7 +990,8 @@ const { ref, uploadBytes, getDownloadURL } = window.storageApi;
         // Check if a file is uploaded
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${file.name}`);
+            const storageRef = ref(window.storage, `invoices/${currentUser.uid}/${Date.now()}_${file.name}`);
+
             
             // Upload file
             const snapshot = await uploadBytes(storageRef, file);
