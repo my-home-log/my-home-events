@@ -515,35 +515,48 @@ async function loadUpcomingMaintenance(userId, property = 'all') {
 
 //  Check for Send reminders        
 async function checkAndSendReminders(records) {
-    const today = new Date();
-    const thirtyDaysFromNow = new Date();
-    const ninetyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
-    ninetyDaysFromNow.setDate(today.getDate() + 90);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to start of day
 
-    for (const record of records) {
-        if (!record.reminder_sent_90 || !record.reminder_sent_30) {
-            const followUpDate = new Date(record.follow_up_date);
-            
-            // 90-day reminder
-            if (!record.reminder_sent_90 && followUpDate >= today && followUpDate <= ninetyDaysFromNow) {
-                await sendReminderEmail(record);
-                const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
-                await window.firestore.updateDoc(docRef, {
-                    reminder_sent_90: true
-                });
-            }
-            
-            // 30-day reminder
-            if (!record.reminder_sent_30 && followUpDate >= today && followUpDate <= thirtyDaysFromNow) {
-                await sendReminderEmail(record);
-                const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
-                await window.firestore.updateDoc(docRef, {
-                    reminder_sent_30: true
-                });
-            }
-        }
+  for (const record of records) {
+    if (!record.follow_up_date) continue;
+
+    const followUpDate = new Date(record.follow_up_date);
+    followUpDate.setHours(0, 0, 0, 0);
+
+    // Calculate days until follow-up
+    const daysUntilFollowUp = Math.floor((followUpDate - today) / (1000 * 60 * 60 * 24));
+
+    // 90-day reminder (send when 89-91 days away)
+    if (!record.reminder_sent_90 && daysUntilFollowUp >= 89 && daysUntilFollowUp <= 91) {
+      await sendReminderEmail(record);
+      const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+      await window.firestore.updateDoc(docRef, {
+        reminder_sent_90: true,
+        reminder_sent_90_date: new Date().toISOString()
+      });
     }
+
+    // 30-day reminder (send when 29-31 days away)
+    if (!record.reminder_sent_30 && daysUntilFollowUp >= 29 && daysUntilFollowUp <= 31) {
+      await sendReminderEmail(record);
+      const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+      await window.firestore.updateDoc(docRef, {
+        reminder_sent_30: true,
+        reminder_sent_30_date: new Date().toISOString()
+      });
+    }
+
+    // Day-of reminder (send on the actual day)
+    if (!record.reminder_sent_0 && daysUntilFollowUp === 0) {
+      await sendReminderEmail(record);
+      const docRef = window.firestore.doc(window.db, 'serviceRecords', record.id);
+      await window.firestore.updateDoc(docRef, {
+        reminder_sent_0: true,
+        reminder_sent_0_date: new Date().toISOString()
+      });
+    }
+  }
 }
 
 //Send Reminder Emails 
